@@ -2,6 +2,7 @@ import streamlit as st
 from nav import nav_bar, footer
 
 nav_bar()
+st.session_state.selected_role = None
 
 st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
 title = st.title("Welcome to SyncPoint")
