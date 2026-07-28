@@ -7,7 +7,7 @@ if "selected_role" not in st.session_state:
 st.write("")
 st.divider()
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3 = st.columns(3, border= True)
 with col1:
     st.image("assets/patient-removebg.png", width= 50, use_container_width= True)
     if st.button("Patient Login"):
