@@ -13,13 +13,12 @@ with middle:
     subheader = st.subheader("Hospital Digital Archive System")
     st.write("Hospital operations by improving data accessibility, reducing risks of lost or misplaced records, and enabling efficient reporting for hospital administration")
 
-st.write("")
 st.divider()
 
 st.header("Manage your health record in 3 simple steps.")
 st.write("Upload, search and access yor documents")
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3 = st.columns(3, border= True)
 with col1:
     st.caption("STEP 01")
     st.image("assets/Upload-logo.png", use_container_width= True)
