@@ -27,11 +27,29 @@ with col3:
     st.caption("Admin Login Here")
 
 if st.session_state.selected_role == "Patient":
-    st.text_input("Enter Your Patient Username")
-    st.text_input("Enter Your Password", type= "password")
+    username = st.text_input("Enter Your Patient Username")
+    password = st.text_input("Enter Your Password", type= "password")
+    #DEMO
+    if st.button("Login"):
+        if username == "patient" and password == "password12":
+            st.write("Login Successful")
+        else:
+            st.write("Login Failed")
 elif st.session_state.selected_role == "Staff":
-    st.text_input("Enter Your Staff Username")
-    st.text_input("Enter Your Password", type= "password")
+    staff_username = st.text_input("Enter Your Staff Username")
+    staff_password = st.text_input("Enter Your Password", type= "password")
+    #DEMO
+    if st.button("Login"):
+        if staff_username == "S-F-001" and staff_password == "@pass12":
+            st.write("Login Successful")
+        else:
+            st.write("Login Failed")
 elif st.session_state.selected_role == "Admin":
-    st.text_input("Enter Your Admin Username")
-    st.text_input("Enter Your Password", type= "password")
+    admin_username = st.text_input("Enter Your Admin Username")
+    admin_password = st.text_input("Enter Your Password", type= "password")
+    #DEMO
+    if st.button("Login"):
+        if admin_username == "A-N-001" and admin_password == "admin12":
+            st.write("Login Successful")
+        else:
+            st.write("Login Failed")
