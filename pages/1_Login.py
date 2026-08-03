@@ -13,15 +13,25 @@ with col1:
     if st.button("Patient Login"):
         st.session_state.selected_role = "Patient"
     st.caption("Registered patient Login Here")
+
 with col2:
     st.image("assets/staff.png", width= 50, use_container_width= True)
-    st.write("Staff Login")
+    if st.button("Staff Login"):
+        st.session_state.selected_role = "Staff"
     st.caption("Staff Login Here")
+
 with col3:
     st.image("assets/admin-removebg.png", width= 50, use_container_width= True)
-    st.write("Admin Login")
+    if st.button("Admin Login"):
+        st.session_state.selected_role = "Admin"
     st.caption("Admin Login Here")
 
 if st.session_state.selected_role == "Patient":
     st.text_input("Enter Your Patient Username")
+    st.text_input("Enter Your Password", type= "password")
+elif st.session_state.selected_role == "Staff":
+    st.text_input("Enter Your Staff Username")
+    st.text_input("Enter Your Password", type= "password")
+elif st.session_state.selected_role == "Admin":
+    st.text_input("Enter Your Admin Username")
     st.text_input("Enter Your Password", type= "password")
