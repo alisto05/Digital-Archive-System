@@ -1,5 +1,6 @@
 import streamlit as st
 from nav import nav_bar
+
 if "selected_role" not in st.session_state:
     st.session_state.selected_role = None
 
@@ -57,5 +58,9 @@ if st.session_state.selected_role == "Patient":
         ]
         st.dataframe(activity)
 
-st.page_link("home.py", label= "Back to Home")
+if "confirm_signout" not in st.session_state:
+    st.session_state.confirm_signout = False
+
+if st.button("Sign Out"):
+    st.switch_page("pages/7_SignOut.py")
 
