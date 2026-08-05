@@ -40,12 +40,13 @@ if st.session_state.selected_role == "Patient":
         st.button("REQUEST CHANGE")
 
     with tab3:
+        search_term = st.text_input("Search your documents")
         st.subheader("Requested Documents")
         documents = [
             {"Document Needed": "Proof of Residence", "Requested by": "Staff", "Status": "Pending"},
         ]
         st.dataframe(documents)
-        search_term = st.text_input("Search your documents")
+
 
         st.subheader("Upload a document")
         upoloaded_file = st.file_uploader("Upload here", type= ["pdf"])
