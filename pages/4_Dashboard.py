@@ -72,34 +72,38 @@ elif st.session_state.selected_role == "Staff":
             {"Patient": "Alisto", "Document Type": "Lap Report", "Status": "Pending"},
             {"Patient": "Khaya", "Document Type": "ID", "Status": "Approved"},
         ]
+
+        documents_to_show = all_documents
+
         if search_term:
             new_docu = []
+            
             for d in all_documents:
                 if search_term in d["Patient"]:
                     new_docu.append(d)
-            st.dataframe(new_docu)
-        else:
-            for d in all_documents:
-                col1, col2, col3, col4, col5 = st.columns(5)
+            documents_to_show = new_docu
 
-                with col1:
-                    st.write(d["Patient"])
-                with col2:
-                    st.write(d["Document Type"])
-                with col3:
-                    st.write(d["Status"])
-                with col4:
-                    if d["Status"] == "Pending":
-                        if st.button("Approve", key= f"approve_{d['Patient']}"):
-                            d["Status"] = "Approved"
-                    else:
-                        st.write("__")
-                with col5:
-                    if d["Status"] == "Pending":
-                        if st.button("Reject", key= f"reject_{d['Patient']}"):
-                            d["Status"] = "Rejected"
-                    else:
-                        st.write("__")
+        for d in documents_to_show:
+            col1, col2, col3, col4, col5 = st.columns(5)
+
+            with col1:
+                st.write(d["Patient"])
+            with col2:
+                st.write(d["Document Type"])
+            with col3:
+                st.write(d["Status"])
+            with col4:
+                if d["Status"] == "Pending":
+                    if st.button("Approve", key= f"approve_{d['Patient']}"):
+                        d["Status"] = "Approved"
+                else:
+                    st.write("__")
+            with col5:
+                if d["Status"] == "Pending":
+                    if st.button("Reject", key= f"reject_{d['Patient']}"):
+                        d["Status"] = "Rejected"
+                else:
+                    st.write("__")
 
     with tab3:
         st.subheader("Reports")
