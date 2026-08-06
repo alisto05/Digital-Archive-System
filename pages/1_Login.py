@@ -9,7 +9,7 @@ st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
 st.write("")
 st.divider()
 
-col1, col2 = st.columns(3, border= True)
+col1, col2 = st.columns(2, border= True)
 with col1:
     st.image("assets/patient-removebg.png", width= 50, use_container_width= True)
     if st.button("Patient Login"):
