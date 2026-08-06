@@ -79,7 +79,21 @@ elif st.session_state.selected_role == "Staff":
                     new_docu.append(d)
             st.dataframe(new_docu)
         else:
-            st.dataframe(all_documents)
+            for d in all_documents:
+                col1, col2, col3, col4, col5 = st.columns(5)
+
+                with col1:
+                    st.write(d["Patient"])
+                with col2:
+                    st.write(d["Document Type"])
+                with col3:
+                    st.write(d["Status"])
+                with col4:
+                    if st.button("Approve", key= f"approve_{d['Patient']}"):
+                        d["Status"] = "Approved"
+                with col5:
+                    if st.button("Reject", key= f"reject_{d['Patient']}"):
+                        d["Status"] = "Rejected"
 
     with tab3:
         st.subheader("Reports")
