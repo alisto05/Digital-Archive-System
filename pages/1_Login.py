@@ -38,7 +38,8 @@ elif st.session_state.selected_role == "Staff":
     #DEMO
     if st.button("Login"):
         if staff_username == "S-Alisto" and staff_password == "@pass12":
-            st.write("Login Successful")
+           st.session_state.logged_in_user = staff_username
+           st.switch_page("pages/4_Dashboard.py")
         else:
             st.write("Login Failed")
             

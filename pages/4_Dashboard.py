@@ -59,12 +59,6 @@ if st.session_state.selected_role == "Patient":
         ]
         st.dataframe(activity)
 
-if "confirm_signout" not in st.session_state:
-    st.session_state.confirm_signout = False
-
-if st.button("Sign Out"):
-    st.switch_page("pages/7_SignOut.py")
-
 elif st.session_state.selected_role == "Staff":
     tab1, tab2, tab3 = st.tabs(["Overview", "Manage Patient Documents", "Reports"])
 
@@ -84,3 +78,11 @@ elif st.session_state.selected_role == "Staff":
         st.subheader("Reports")
         st.metric("Total Documents", "24")
         st.metric("Pending Approvals", "3")
+
+
+if "confirm_signout" not in st.session_state:
+    st.session_state.confirm_signout = False
+
+if st.button("Sign Out"):
+    st.switch_page("pages/7_SignOut.py")
+
