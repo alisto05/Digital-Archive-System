@@ -89,11 +89,17 @@ elif st.session_state.selected_role == "Staff":
                 with col3:
                     st.write(d["Status"])
                 with col4:
-                    if st.button("Approve", key= f"approve_{d['Patient']}"):
-                        d["Status"] = "Approved"
+                    if d["Status"] == "Pending":
+                        if st.button("Approve", key= f"approve_{d['Patient']}"):
+                            d["Status"] = "Approved"
+                    else:
+                        st.write("__")
                 with col5:
-                    if st.button("Reject", key= f"reject_{d['Patient']}"):
-                        d["Status"] = "Rejected"
+                    if d["Status"] == "Pending":
+                        if st.button("Reject", key= f"reject_{d['Patient']}"):
+                            d["Status"] = "Rejected"
+                    else:
+                        st.write("__")
 
     with tab3:
         st.subheader("Reports")
