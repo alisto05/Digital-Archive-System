@@ -65,3 +65,22 @@ if "confirm_signout" not in st.session_state:
 if st.button("Sign Out"):
     st.switch_page("pages/7_SignOut.py")
 
+elif st.session_state.selected_role == "Staff":
+    tab1, tab2, tab3 = st.tabs(["Overview", "Manage Patient Documents", "Reports"])
+
+    with tab1:
+        st.header(f"Welcome back, {st.session_state.logged_in_user}")
+        st.info("3 Documents pending approval")
+    with tab2:
+        st.subheader("Patient Documents")
+        search_term = st.text_input("Search by patient name, ID or Document type")
+        all_documents = [
+            {"Patient": "Alisto", "Document Type": "Lap Report", "Status": "Pending"},
+            {"Patient": "Khaya", "Document Type": "ID", "Status": "Approved"},
+        ]
+        st.dataframe(all_documents)
+
+    with tab3:
+        st.subheader("Reports")
+        st.metric("Total Documents", "24")
+        st.metric("Pending Approvals", "3")

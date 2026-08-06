@@ -37,7 +37,7 @@ elif st.session_state.selected_role == "Staff":
     staff_password = st.text_input("Enter Your Password", type= "password")
     #DEMO
     if st.button("Login"):
-        if staff_username == "S-F-001" and staff_password == "@pass12":
+        if staff_username == "S-Alisto" and staff_password == "@pass12":
             st.write("Login Successful")
         else:
             st.write("Login Failed")
