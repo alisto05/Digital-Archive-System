@@ -9,7 +9,7 @@ st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
 st.write("")
 st.divider()
 
-col1, col2, col3 = st.columns(3, border= True)
+col1, col2 = st.columns(3, border= True)
 with col1:
     st.image("assets/patient-removebg.png", width= 50, use_container_width= True)
     if st.button("Patient Login"):
@@ -21,12 +21,6 @@ with col2:
     if st.button("Staff Login"):
         st.session_state.selected_role = "Staff"
     st.caption("Staff Login Here")
-
-with col3:
-    st.image("assets/admin-removebg.png", width= 50, use_container_width= True)
-    if st.button("Admin Login"):
-        st.session_state.selected_role = "Admin"
-    st.caption("Admin Login Here")
 
 if st.session_state.selected_role == "Patient":
     username = st.text_input("Enter Your Patient Username")
@@ -47,12 +41,4 @@ elif st.session_state.selected_role == "Staff":
             st.write("Login Successful")
         else:
             st.write("Login Failed")
-elif st.session_state.selected_role == "Admin":
-    admin_username = st.text_input("Enter Your Admin Username")
-    admin_password = st.text_input("Enter Your Password", type= "password")
-    #DEMO
-    if st.button("Login"):
-        if admin_username == "A-N-001" and admin_password == "admin12":
-            st.write("Login Successful")
-        else:
-            st.write("Login Failed")
+            

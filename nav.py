@@ -32,5 +32,4 @@ def footer():
     with col4:
         st.write("**For Staff**")
         st.page_link("pages/1_Login.py", label= "Staff Login", use_container_width= True)
-        st.page_link("pages/4_Dashboard.py", label= "Admin Login", use_container_width= True)
         
