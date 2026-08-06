@@ -72,7 +72,14 @@ elif st.session_state.selected_role == "Staff":
             {"Patient": "Alisto", "Document Type": "Lap Report", "Status": "Pending"},
             {"Patient": "Khaya", "Document Type": "ID", "Status": "Approved"},
         ]
-        st.dataframe(all_documents)
+        if search_term:
+            new_docu = []
+            for d in all_documents:
+                if search_term in d["Patient"]:
+                    new_docu.append(d)
+            st.dataframe(new_docu)
+        else:
+            st.dataframe(all_documents)
 
     with tab3:
         st.subheader("Reports")
