@@ -2,6 +2,16 @@ import streamlit as st
 from nav import nav_bar
 
 nav_bar()
+
+if "logged_in_role" not in st.session_state:
+    st.session_state.logged_in_role = None
+
+#This send the Patient or the Staff directly to their dashboard,
+#if they logged in successful
+if st.session_state.logged_in_role:
+    st.switch_page("pages/4_Dashboard.py")
+
+#This tracks which or who is logging in(patient or Staff) 
 if "selected_role" not in st.session_state:
     st.session_state.selected_role = None
 
@@ -9,9 +19,7 @@ st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
 st.write("")
 st.divider()
 
-if st.session_state.logged_in_role:
-    st.switch_page("pages/4_Dashboard.py")
-
+#This separates the Patient and Staff using a border
 col1, col2 = st.columns(2, border= True)
 with col1:
     st.image("assets/patient-removebg.png", width= 50, use_container_width= True)
@@ -25,9 +33,11 @@ with col2:
         st.session_state.selected_role = "Staff"
     st.caption("Staff Login Here")
 
+#If the Pateient was clicked, this how it would look like
 if st.session_state.selected_role == "Patient":
     username = st.text_input("Enter Your Patient Username")
     password = st.text_input("Enter Your Password", type= "password")
+    
     #DEMO
     if st.button("Login"):
         if username == "Alisto" and password == "password12":
@@ -36,9 +46,12 @@ if st.session_state.selected_role == "Patient":
             st.switch_page("pages/4_Dashboard.py")
         else:
             st.write("Login Failed")
+
+#If the Staff was clicked, this how it would look like          
 elif st.session_state.selected_role == "Staff":
     staff_username = st.text_input("Enter Your Staff Username")
     staff_password = st.text_input("Enter Your Password", type= "password")
+
     #DEMO
     if st.button("Login"):
         if staff_username == "S-Alisto" and staff_password == "@pass12":
