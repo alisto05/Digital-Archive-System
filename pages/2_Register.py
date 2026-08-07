@@ -52,4 +52,50 @@ if id_number:
                 "Date of Birth",
                 options= [birth_date]
             )
-            
+
+address = st.write("**Address**")
+
+country = st.selectbox("Country",
+                       options= ["South Africa"]
+                       )
+address_2 = st.text_input("Enter your Address")
+city = st.text_input("City")
+postal = st.text_input("Enter your zip code")
+province = st.selectbox("Province", 
+                        options= ["Gauteng", "Polokwane",
+                                  "Mpumalanga", "KwaZulu Natal",
+                                  "Eastern Cape", "Western Cape",
+                                  "Northern Cape", "Free State",
+                                  "North West"
+                                  ]
+                        )
+contact_info = st.write("**Phone Numbers**")
+home = st.text_input("Home")
+if home:
+    if len(home) != 10:
+        st.error("Home Number must be 10 digit.")
+    elif not home.isdigit():
+        st.error("ID Number must only contain numbers.")
+work = st.text_input("Work")
+if work:
+    if len(work) != 10:
+        st.error("Work Number must only 10 digit.")
+    elif not work.isdigit():
+        st.error("ID Number must only contain numbers.") 
+
+phone = st.text_input("Mobile Phone")
+phone_2 = st.text_input("Secondary Phone")
+if phone:
+    if len(phone) != 10:
+        st.error("Mobile Phone must only 10 digit.")
+    elif not phone.isdigit():
+        st.error("Mobile Phone must only contain numbers.") 
+if phone_2:
+    if len(phone_2) !=10:
+        st.error("Secondary Phone must only be 10 digit.")
+    elif not phone_2.isdigit():
+        st.error("Secondary Phone must only contain numbers.")
+
+st.write("**Email**")
+email = st.text_input("Enter your email address")
+email_2 = st.text_input("Enter your Secondary email address")
