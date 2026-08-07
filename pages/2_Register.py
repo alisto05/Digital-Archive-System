@@ -12,10 +12,11 @@ title = st.selectbox("Select your title:",
 
 first_name = st.text_input("First Name")
 middle_name = st.text_input("Middle Name")
-laste_name = st.text_input("Last Name")
+last_name = st.text_input("Last Name")
 
 id_number = st.text_input("Enter your ID Number")
 len(id_number)
-if len(id_number) != 13:
-    st.error("ID Number must be 13 digits")
+if id_number:
+    if len(id_number) != 13:
+        st.error("ID Number must be 13 digits")
 
