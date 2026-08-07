@@ -49,7 +49,7 @@ if id_number:
 
             #After giving the correct date of birth
             birth_date = f"{selected_year}-{mm:02d}-{dd:02d}"
-            st.text_input("Date of Birth", value= birth_date, disabled= False)
+            st.text_input("Date of Birth", value= birth_date, disabled= True)
 
 st.write("**Address**")
 
