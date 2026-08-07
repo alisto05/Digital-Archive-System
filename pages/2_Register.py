@@ -97,3 +97,11 @@ if phone_2:
 st.write("**Email**")
 email = st.text_input("Enter your email address")
 email_2 = st.text_input("Enter your Secondary email address")
+
+st.write("Medical - Aid")
+medical_aid = st.radio("Do you have a Medical Aid ",
+                       options= ["Yes", "No"]
+                       )
+if medical_aid == "Yes":
+    provider = st.text_input("Provider")
+    membership_num = st.text_input("Membership Number")
