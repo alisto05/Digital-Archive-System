@@ -14,6 +14,7 @@ title = st.selectbox("Select your title:",
 first_name = st.text_input("First Name")
 middle_name = st.text_input("Middle Name")
 last_name = st.text_input("Last Name")
+nickname = st.text_input("Preferred name")
 
 id_number = st.text_input("Enter your ID Number")
 
