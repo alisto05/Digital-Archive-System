@@ -7,6 +7,7 @@ with col1:
     if st.button("Yes"):
         st.session_state.selected_role = None
         st.session_state.logged_in_user = None
+        st.session_state.logged_in_role = None
         st.switch_page("home.py")
 with col2:
     if st.button("Cancel"):

@@ -9,6 +9,9 @@ st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
 st.write("")
 st.divider()
 
+if st.session_state.logged_in_role:
+    st.switch_page("pages/4_Dashboard.py")
+
 col1, col2 = st.columns(2, border= True)
 with col1:
     st.image("assets/patient-removebg.png", width= 50, use_container_width= True)
@@ -29,6 +32,7 @@ if st.session_state.selected_role == "Patient":
     if st.button("Login"):
         if username == "Alisto" and password == "password12":
             st.session_state.logged_in_user = username
+            st.session_state.logged_in_role = "Patient"
             st.switch_page("pages/4_Dashboard.py")
         else:
             st.write("Login Failed")
@@ -39,6 +43,7 @@ elif st.session_state.selected_role == "Staff":
     if st.button("Login"):
         if staff_username == "S-Alisto" and staff_password == "@pass12":
             st.session_state.logged_in_user = staff_username
+            st.session_state.logged_in_role = "Staff"
             st.switch_page("pages/4_Dashboard.py")
         else:
             st.write("Login Failed")

@@ -11,11 +11,14 @@ if "all_documents" not in st.session_state:
 if "selected_role" not in st.session_state:
     st.session_state.selected_role = None
 
+if "logged_in_role" not in st.session_state:
+    st.session_state.logged_in_role = None
+
 nav_bar()
 
 st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
 
-if st.session_state.selected_role == "Patient":
+if st.session_state.logged_in_role == "Patient":
     tab1, tab2, tab3, tab4 = st.tabs(["Overview", "My profile", "My Documents", "Recent Activity"])
 
 
@@ -66,7 +69,7 @@ if st.session_state.selected_role == "Patient":
         ]
         st.dataframe(activity)
 
-elif st.session_state.selected_role == "Staff":
+elif st.session_state.logged_in_role == "Staff":
     tab1, tab2, tab3 = st.tabs(["Overview", "Manage Patient Documents", "Reports"])
 
     with tab1:
