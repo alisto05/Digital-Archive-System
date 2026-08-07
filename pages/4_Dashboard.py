@@ -1,6 +1,13 @@
 import streamlit as st
 from nav import nav_bar
 
+
+if "all_documents" not in st.session_state:
+    st.session_state.all_documents = [
+            {"Patient": "Alisto", "Document Type": "Lap Report", "Status": "Pending"},
+            {"Patient": "Khaya", "Document Type": "ID", "Status": "Approved"},
+            ]
+    
 if "selected_role" not in st.session_state:
     st.session_state.selected_role = None
 
@@ -68,17 +75,14 @@ elif st.session_state.selected_role == "Staff":
     with tab2:
         st.subheader("Patient Documents")
         search_term = st.text_input("Search by patient name, ID or Document type")
-        all_documents = [
-            {"Patient": "Alisto", "Document Type": "Lap Report", "Status": "Pending"},
-            {"Patient": "Khaya", "Document Type": "ID", "Status": "Approved"},
-        ]
 
-        documents_to_show = all_documents
+
+        documents_to_show = st.session_state.all_documents
 
         if search_term:
             new_docu = []
             
-            for d in all_documents:
+            for d in st.session_state.all_documents:
                 if search_term in d["Patient"]:
                     new_docu.append(d)
             documents_to_show = new_docu
