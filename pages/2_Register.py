@@ -49,28 +49,25 @@ if id_number:
 
             #After giving the correct date of birth
             birth_date = f"{selected_year}-{mm:02d}-{dd:02d}"
-            st.selectbox(
-                "Date of Birth",
-                options= [birth_date]
-            )
+            st.text_input("Date of Birth", value= birth_date, disabled= False)
 
-address = st.write("**Address**")
+st.write("**Address**")
 
 country = st.selectbox("Country",
                        options= ["South Africa"]
                        )
-address_2 = st.text_input("Enter your Address")
+address = st.text_input("Enter your Address")
 city = st.text_input("City")
 postal = st.text_input("Enter your zip code")
 province = st.selectbox("Province", 
-                        options= ["Gauteng", "Polokwane",
+                        options= ["Gauteng", "Limpopo",
                                   "Mpumalanga", "KwaZulu Natal",
                                   "Eastern Cape", "Western Cape",
                                   "Northern Cape", "Free State",
                                   "North West"
                                   ]
                         )
-contact_info = st.write("**Phone Numbers**")
+st.write("**Phone Numbers**")
 home = st.text_input("Home")
 if home:
     if len(home) != 10:
