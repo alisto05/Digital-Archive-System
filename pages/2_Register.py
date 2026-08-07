@@ -32,12 +32,18 @@ if id_number:
 
         if year_option_2 < current_year:
             valid_years.append(year_option_2)
+
         selected_year = st.selectbox("Select your Birth Year",
                     options= valid_years
                     )
-            
+        birth_date = f"{selected_year}-{mm:02d}-{dd:02d}"
+        
+
+                   
         if mm < 1 or mm > 12:
             st.error("Invalid ID Number, Check the month section.")
         elif dd < 1 or dd > 31:
             st.error("Invalid ID Number, Check the date section.")
+        else:
+            st.success(birth_date)
 
