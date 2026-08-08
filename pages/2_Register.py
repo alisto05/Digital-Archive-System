@@ -105,3 +105,33 @@ medical_aid = st.radio("Do you have a Medical Aid ",
 if medical_aid == "Yes":
     provider = st.text_input("Provider")
     membership_num = st.text_input("Membership Number")
+
+st.write("**Your Login details**")
+username = st.text_input("Enter your Username")
+password = st.text_input("Enter your Password", type= "password")
+password_2 = st.text_input("Confirm password", type= "password")
+
+if str(password) or str(password_2):
+    if len(password) <= 5:
+        st.error("Password must be more than 5 characters")
+    elif password != password_2:
+        st.error("Password doesn't match")
+    else:
+        submit = st.button("Submit")
+        if submit:
+            st.session_state.reg_first_name = first_name
+            st.session_state.reg_username = username
+            st.session_state.reg_id_number = id_number
+            st.session_state.reg_address = address
+            st.session_state.reg_city = city
+            st.session_state.reg_province = province
+            st.session_state.reg_phone_number = phone
+            st.session_state.reg_email = email
+            st.session_state.reg_medical_aid = medical_aid
+            if "birth_date" in locals():
+                st.session_state.reg_birth_date = birth_date
+            if "provider" in locals():
+                st.session_state.reg_provider = provider
+            if "membership_num" in locals():
+                st.session_state.reg_membership_num = membership_num
+            st.switch_page("pages/1_Login.py")
