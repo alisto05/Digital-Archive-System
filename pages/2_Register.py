@@ -123,16 +123,15 @@ for field, value in required:
     if value is None or str(value).strip() == "":
         missing_field.append(field)
 
-if missing_field:
-    if missing_field == None:
+submit = st.button("Submit")
+if submit:
+    if missing_field:
         st.error(f"Please fill in the following fields: {', '.join(missing_field)}")
-elif len(password) <= 5:
-    st.error("Password must be more than 5 characters")
-elif password != password_2:
-    st.error("Password doesn't match")
-else:
-    submit = st.button("Submit")
-    if submit:
+    elif len(password) <= 5:
+        st.error("Password must be more than 5 characters")
+    elif password != password_2:
+        st.error("Password doesn't match")
+    else:
         st.session_state.reg_first_name = first_name
         st.session_state.reg_username = username
         st.session_state.reg_id_number = id_number
