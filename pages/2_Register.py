@@ -111,27 +111,44 @@ username = st.text_input("Enter your Username")
 password = st.text_input("Enter your Password", type= "password")
 password_2 = st.text_input("Confirm password", type= "password")
 
-if str(password) or str(password_2):
-    if len(password) <= 5:
-        st.error("Password must be more than 5 characters")
-    elif password != password_2:
-        st.error("Password doesn't match")
-    else:
-        submit = st.button("Submit")
-        if submit:
-            st.session_state.reg_first_name = first_name
-            st.session_state.reg_username = username
-            st.session_state.reg_id_number = id_number
-            st.session_state.reg_address = address
-            st.session_state.reg_city = city
-            st.session_state.reg_province = province
-            st.session_state.reg_phone_number = phone
-            st.session_state.reg_email = email
-            st.session_state.reg_medical_aid = medical_aid
-            if "birth_date" in locals():
-                st.session_state.reg_birth_date = birth_date
-            if "provider" in locals():
-                st.session_state.reg_provider = provider
-            if "membership_num" in locals():
-                st.session_state.reg_membership_num = membership_num
-            st.switch_page("pages/1_Login.py")
+required = [("First Name", first_name), ("Last Name", last_name),
+            ("Preferred name", nickname), ("ID Number", id_number),
+            ("Enter your Address", address), ("City", city),
+            ("Enter your zip code", postal), ("Province", province),
+            ("Mobile Phone", phone), ("Enter your email address", email),
+            ("Enter yor Username", username), ("Enter your password", password)
+            ]
+missing_field = []
+for field, value in required:
+    if value is None or str(value).strip() == "":
+        missing_field.append(field)
+
+if missing_field:
+    if missing_field == None:
+        st.error(f"Please fill in the following fields: {', '.join(missing_field)}")
+elif len(password) <= 5:
+    st.error("Password must be more than 5 characters")
+elif password != password_2:
+    st.error("Password doesn't match")
+else:
+    submit = st.button("Submit")
+    if submit:
+        st.session_state.reg_first_name = first_name
+        st.session_state.reg_username = username
+        st.session_state.reg_id_number = id_number
+        st.session_state.reg_address = address
+        st.session_state.reg_city = city
+        st.session_state.reg_province = province
+        st.session_state.reg_phone_number = phone
+        st.session_state.reg_email = email
+        st.session_state.reg_medical_aid = medical_aid
+        if "birth_date" in locals():
+            st.session_state.reg_birth_date = birth_date
+        if "provider" in locals():
+            st.session_state.reg_provider = provider
+        if "membership_num" in locals():
+            st.session_state.reg_membership_num = membership_num
+        st.switch_page("pages/1_Login.py")
+
+
+
