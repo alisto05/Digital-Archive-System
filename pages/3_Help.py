@@ -42,6 +42,14 @@ with tab1:
         </div>
         """,
         unsafe_allow_html=True
-    ) 
-
+    )
+with tab2:
+    with st.expander("How do I Register?"):
+        st.write("Click on the Register Navigation Bar/ Menu")
+    with st.expander("How do I search for a document?"):
+        st.write("After you register, you have to login using your details, Once logged in you can search for your documents you submitted.")
+    with st.expander("Can patients see other patients documents?"):
+        st.write("**NO**")
+    with st.expander("What should I do if I can't log in"):
+        st.write("When you have entered your details countless times, Click 'Reset the password'.")
     
