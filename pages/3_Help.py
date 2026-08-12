@@ -52,4 +52,7 @@ with tab2:
         st.write("**NO**")
     with st.expander("What should I do if I can't log in"):
         st.write("When you have entered your details countless times, Click 'Reset the password'.")
-    
+with tab3:
+    #After the full System is built/ done
+    st.subheader("A Full Quick Guide")
+    st.image("assets/Quick-guide.png", use_container_width= True)
