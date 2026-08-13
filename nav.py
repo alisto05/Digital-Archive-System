@@ -1,7 +1,18 @@
 import streamlit as st
 
 def nav_bar():
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    st.markdown(
+        "<style>[data-testid='stSidebarNav'] {display: none;}</style>",
+        unsafe_allow_html=True
+    )
+
+    with st.sidebar:
+        st.page_link("home.py", label="Home")
+        st.page_link("pages/1_Login.py", label="Login")
+        st.page_link("pages/2_Register.py", label="Register")
+        st.page_link("pages/3_Help.py", label="Help")
+        
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.page_link("home.py", label= "Home")
     with col2:
@@ -10,10 +21,6 @@ def nav_bar():
         st.page_link("pages/2_Register.py", label= "Register")
     with col4:
         st.page_link("pages/3_Help.py", label= "Help")
-    with col5:
-        st.page_link("pages/5_Search.py", label= "Search")
-    with col6:
-        st.page_link("pages/6_Upload.py", label= "Upload")
 
 
 def footer():
@@ -28,7 +35,6 @@ def footer():
         st.write("**For Patients**")
         st.page_link("pages/2_Register.py", label= "Register", use_container_width= True)
         st.page_link("pages/1_Login.py", label= "Login", use_container_width= True)
-        st.page_link("pages/1_Login.py", label= "Upload Documents", use_container_width= True)
     with col4:
         st.write("**For Staff**")
         st.page_link("pages/1_Login.py", label= "Staff Login", use_container_width= True)
