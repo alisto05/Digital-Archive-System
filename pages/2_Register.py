@@ -1,7 +1,7 @@
 import streamlit as st
 from nav import nav_bar
 from datetime import datetime
-from database_archive import register_patient
+from db import register_patient
 
 nav_bar()
 if "selected_role" not in st.session_state:
