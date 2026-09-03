@@ -48,3 +48,26 @@ def register_patient(
         1 if has_medical_aid else 0, provider, membership_number,
         0
     )
+    try:
+        result_args = cursor.callproc("sp_register_patient", args)
+        conn.commit()
+        new_patient_id = result_args[-1]
+
+        return True, new_patient_id
+
+    except mysql_errors.IntegrityError as e:
+        conn.rollback()
+        if "username" in str(e).lower():
+            return False, "That username is already taken."
+        elif "id_number" in str(e).lower():
+            return False, "An Account with that Id Number already exists."
+        else:
+            return False, "Registration failed - some details are already in use."
+
+    except mysql_errors.Error as e:
+        conn.rollback()
+        return False, f"Database error: {e}"
+
+    finally:
+        cursor.close()
+        conn.close()
