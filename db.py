@@ -13,3 +13,7 @@ def get_connection():
         database = "syncpoint_archive"
     )
 
+def hash_password(plain_password: str) -> str:
+    salt = secrets.token_hex(16)
+    hashed = hashlib.sha256((salt + plain_password).encode()).hexdigest()
+    return f"{salt}${hashed}"
