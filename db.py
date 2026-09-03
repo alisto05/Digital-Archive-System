@@ -26,3 +26,25 @@ def verify_password(plain_password: str, stored_hash: str) -> bool:
     attempt_hash = hashlib.sha256((salt + plain_password).encode()).hexdigest()
     return attempt_hash == hashed
 
+def register_patient(
+        username, plain_password, title, first_name, middle_name, last_name,
+        preferred_name, id_number, date_of_birth,
+        country, address_line, city, postal_code, province,
+        home_phone, work_phone, mobile_phone, secondary_phone,
+        email, secondary_email,
+        has_medical_aid, provider, membership_number
+):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    password_hash = hash_password(plain_password)
+
+    args = (
+        username, password_hash, title, first_name, middle_name, last_name,
+        preferred_name, id_number, date_of_birth,
+        country, address_line, city, postal_code, province,
+        home_phone, work_phone, mobile_phone, secondary_phone,
+        email, secondary_email,
+        1 if has_medical_aid else 0, provider, membership_number,
+        0
+    )
