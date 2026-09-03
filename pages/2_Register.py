@@ -1,9 +1,11 @@
 import streamlit as st
 from nav import nav_bar
 from datetime import datetime
+from database_archive import register_patient
 
 nav_bar()
-st.session_state.selected_role = None
+if "selected_role" not in st.session_state:
+    st.session_state.selected_role = None
 
 st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
 
@@ -17,6 +19,8 @@ last_name = st.text_input("Last Name")
 nickname = st.text_input("Preferred name")
 
 id_number = st.text_input("Enter your ID Number")
+birth_date = None
+birth_date_valid = False
 
 if id_number:
     if len(id_number) != 13:
@@ -49,6 +53,7 @@ if id_number:
 
             #After giving the correct date of birth
             birth_date = f"{selected_year}-{mm:02d}-{dd:02d}"
+            birth_date_valid = True
             st.text_input("Date of Birth", value= birth_date, disabled= True)
 
 st.write("**Address**")
@@ -102,6 +107,8 @@ st.write("Medical - Aid")
 medical_aid = st.radio("Do you have a Medical Aid ",
                        options= ["Yes", "No"]
                        )
+provider = ""
+membership_num = ""
 if medical_aid == "Yes":
     provider = st.text_input("Provider")
     membership_num = st.text_input("Membership Number")
@@ -127,27 +134,43 @@ submit = st.button("Submit")
 if submit:
     if missing_field:
         st.error(f"Please fill in the following fields: {', '.join(missing_field)}")
+    elif not birth_date_valid:
+        st.error("Please enter a valid ID Number before submitting.")
     elif len(password) <= 5:
         st.error("Password must be more than 5 characters")
     elif password != password_2:
         st.error("Password doesn't match")
+    elif medical_aid == "Yes" and (not provider or not membership_num):
+        st.error("Please fill in your Medical Aid provider and membership number or select 'No'.")
     else:
-        st.session_state.reg_first_name = first_name
-        st.session_state.reg_username = username
-        st.session_state.reg_id_number = id_number
-        st.session_state.reg_address = address
-        st.session_state.reg_city = city
-        st.session_state.reg_province = province
-        st.session_state.reg_phone_number = phone
-        st.session_state.reg_email = email
-        st.session_state.reg_medical_aid = medical_aid
-        if "birth_date" in locals():
-            st.session_state.reg_birth_date = birth_date
-        if "provider" in locals():
-            st.session_state.reg_provider = provider
-        if "membership_num" in locals():
-            st.session_state.reg_membership_num = membership_num
-        st.switch_page("pages/1_Login.py")
-
-
-
+        with st.spinner("Creating your Account..."):
+            success, result = register_patient(
+                username = username,
+                plain_password = password,
+                title = title,
+                first_name = first_name,
+                middle_name = middle_name,
+                last_name = last_name,
+                preferred_name = nickname,
+                id_number = id_number,
+                date_of_birth = birth_date,
+                country = country,
+                address_line = address,
+                city = city,
+                postal_code = postal,
+                province = province,
+                home_phone = home,
+                work_phone = work,
+                mobile_phone = phone,
+                secondary_phone = phone_2,
+                email = email,
+                secondary_email = email_2,
+                has_medical_aid = (medical_aid == "Yes"),
+                provider = provider if medical_aid == "Yes" else None,
+                membership_number = membership_num if medical_aid == "Yes" else None,
+            )
+        if success:
+            st.success("Account Created! Please log in.")
+            st.switch_page("pages/1_Login.py")
+        else:
+            st.error(result)
