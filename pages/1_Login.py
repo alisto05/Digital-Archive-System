@@ -57,25 +57,20 @@ if st.session_state.selected_role == "Patient":
             st.session_state.logged_in_role = "Patient"
             st.session_state.patient_id = record["patient_id"]
             st.switch_page("pages/4_Dashboard.py")
-            
-        if username == "Alisto" and password == "password12":
-            st.session_state.logged_in_user = username
-            st.session_state.logged_in_role = "Patient"
-            st.switch_page("pages/4_Dashboard.py")
-        else:
-            st.write("Login Failed")
-
-#If the Staff was clicked, this how it would look like          
 elif st.session_state.selected_role == "Staff":
     staff_username = st.text_input("Enter Your Staff Username")
     staff_password = st.text_input("Enter Your Password", type= "password")
 
-    #DEMO
     if st.button("Login"):
-        if staff_username == "S-Alisto" and staff_password == "@pass12":
-            st.session_state.logged_in_user = staff_username
-            st.session_state.logged_in_role = "Staff"
-            st.switch_page("pages/4_Dashboard.py")
+        record = get_staff_login_data(staff_username)
+
+        if record is None:
+            st.error("Login Failed")
+        elif not verify_password(staff_password, record["password_hash"]):
+            st.error("Login Failed")
         else:
-            st.write("Login Failed")
+            st.session_state.logged_in_user = f"{record['first_name']} {record['last_name']}"
+            st.session_state.logged_in_role = "Staff"
+            st.session_state.staff_id = record["staff_id"]
+            st.switch_page("pages/4_Dashboard.py")           
             
