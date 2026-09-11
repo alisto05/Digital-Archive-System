@@ -1,5 +1,6 @@
 import streamlit as st
 from nav import nav_bar
+from db import get_patient_login_data, get_staff_login_data, verify_password
 
 nav_bar()
 
@@ -40,6 +41,23 @@ if st.session_state.selected_role == "Patient":
     
     #DEMO
     if st.button("Login"):
+        record = get_patient_login_data(username)
+
+        if record is None:
+            st.error("Login Failed")
+        elif not verify_password(password, record["password_hash"]):
+            st.error("Login Failed")
+        elif record["status"] == "PENDING":
+            st.warning("Your registration is still awaiting Staff Approval.")
+        elif record["status"] == "REJECTED":
+            st.error("Your Registration was not approved. Contact SyncPoint support.")
+
+        else:
+            st.session_state.logged_in_user = record["preferred_name"] or username
+            st.session_state.logged_in_role = "Patient"
+            st.session_state.patient_id = record["patient_id"]
+            st.switch_page("pages/4_Dashboard.py")
+            
         if username == "Alisto" and password == "password12":
             st.session_state.logged_in_user = username
             st.session_state.logged_in_role = "Patient"
