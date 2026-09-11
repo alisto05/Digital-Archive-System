@@ -4,6 +4,7 @@ from datetime import datetime
 from db import register_patient
 
 nav_bar()
+
 if "selected_role" not in st.session_state:
     st.session_state.selected_role = None
 
