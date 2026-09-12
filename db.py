@@ -9,7 +9,7 @@ def get_connection():
     return mysql.connector.connect(
         host = "localhost",
         user = "root",
-        #password = "mypassword",
+        password = "@Zingisa24",
         database = "syncpoint_archive"
     )
 
@@ -76,7 +76,7 @@ def get_patient_login_data(username):
     conn = get_connection()
     cursor = conn.cursor(dictionary= True)
     cursor.execute(""" 
-    SELECT u.user_id, u.password_hash, p'patient_id, p.status, p.preferred_name
+    SELECT u.user_id, u.password_hash, p.patient_id, p.status, p.preferred_name
     FROM users u
     JOIN patients p ON p.user_id = u.user_id
     WHERE u.username = %s AND u.role = 'PATIENT'
