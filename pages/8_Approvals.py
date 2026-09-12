@@ -30,5 +30,5 @@ else:
 
             with col2:
                 if st.button("Reject", key= f"reject_{patient['patient_id']}"):
-                    update_patient_status(patient["patient_id", "REJECTED"])
+                    update_patient_status(patient["patient_id"], "REJECTED")
                     st.rerun()
