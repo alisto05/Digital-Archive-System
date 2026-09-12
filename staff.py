@@ -67,6 +67,65 @@ def generate_strong_password(length= 12):
 
     return "".join(password_chars)
 
+def create_staff_account():
+    print("=== SyncPoint Staff Account Setup ===\n")
+
+    first_name = input("First Name: ").strip()
+    last_name = input("Last Name: ").strip()
+
+    role_digit = None
+    while role_digit is None:
+        typed_title = input("Job Title (Doctor/ Nurse/ Receptionist): ").strip()
+        role_digit = get_role_digit(typed_title)
+        if role_digit is None:
+            known - ", ".join(t.title() for t in JOB_ROLE_DIGITS)
+            print(f"Unknown job title. Known titles: {known_titles}")
+
+    job_title = typed_title.title()
+
+    courtesy_title = None
+    if job_title != "Doctor":
+        while courtesy_title not in ("Mr.", "Mrs.", "Miss."):
+            courtesy_title = input("Courtesy Title (Mr. / Mrs. / Miss.): ").strip()
+            if courtesy_title not in ("Mr.", "Mrs.", "Miss."):
+                print("Please enter exactly one of: Mr., Mrs., Miss.")
+
+    department = input("Department: ").strip()
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    staff_number = generate_staff_number(cursor, role_digit)
+    username = generate_username(first_name, staff_number, job_title)
+    base_username = username
+    attempt = 1
+    while username_exists(cursor, username):
+        attempt += 1
+        username = f"{base_username}{attempt}"
+
+    plain_password = generate_strong_password()
+
+    print("\nGenrate account details:")
+    print(f" Username:      {username}")
+    print(f" Staff Number:  {staff_number}")
+    print(f" Password:      {plain_password}")
+    if courtesy_title:
+        print(f"Will display to patients as: Dr. {job_title} {courtesy_title} {last_name}")
+    else:
+        print(f" Will display to patients as Dr. {last_name}")
+    confirm = input("\nCreate this account? (y/n): ").strip().lower()
+
+    if confirm != "y":
+        print("Cancelled, No Account created.")
+        cursor.close()
+        conn.close()
+        return
+
+    password_hash = hash_password(plain_password)
+
+
+    
+
 def generate_staff_number(cursor):
     """
     Wantt to build a staff number that takes/ starts with 'S-'
