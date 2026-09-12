@@ -15,6 +15,23 @@ JOB_ROLE_DIGITS = {
 def get_role_digit(job_title):
     return JOB_ROLE_DIGITS.get(job_title.strip().lower())
 
+def generate_staff_number(cursor, role_digit):
+    pattern = f"S-{role_digit}_______"
+    cursor.execute("SELECT staff_number FROM staff WHERE staff_number LIKE %s", (pattern,))
+    existing_numbers = cursor.fetchall()
+
+    highest_seq = 0
+    for (staff_number,) in existing_numbers:
+        seq_part = staff_number[3:]
+        seq = int(seq_part)
+        if seq > highest_seq:
+            highest_seq = seq
+
+    next_seq = highest_seq + 1
+    padded = str(next_seq).zfill(7)
+
+    return f"S-{role_digit}{padded}"
+
 def generate_staff_number(cursor):
     """
     Wantt to build a staff number that takes/ starts with 'S-'
