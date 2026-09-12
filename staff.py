@@ -160,17 +160,3 @@ def create_staff_account():
 
 if __name__ == "__main__":
     create_staff_account()
-
-def generate_staff_number(cursor):
-    """
-    Wantt to build a staff number that takes/ starts with 'S-'
-    and begin with a number 4 then random numbers but less than 8
-    """
-    cursor.execute(""" 
-    SELECT AUTO_INCREMENT
-    FROM information_schema.TABLES
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'staff'
-    """)
-    (next_id,) = cursor.fetchone()
-
-    #7 numbers
