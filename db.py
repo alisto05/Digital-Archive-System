@@ -130,3 +130,7 @@ def update_patient_status(patient_id, new_status):
     cursor.close()
     conn.close()
 
+def format_staff_display_name(job_title, courtesy_title, last_name):
+    if job_title == "Doctor":
+        return f"Dr. {last_name}"
+    return f"{job_title} {courtesy_title or ''} {last_name}".replace(" ", " ").strip()
