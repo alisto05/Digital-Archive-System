@@ -4,10 +4,16 @@ from db import get_connection, hash_password
 from mysql.connector import errors as mysql_errors
 
 JOB_ROLE_DIGITS = {
+    #1-3 set for Doctor type role
     "doctor": "1",
-    "nurse": "4"
-    "receptionist": "5"
+    #4-9 set for nurses
+    "nurse": "4",
+    #5 are set for receptionist
+    "receptionist": "5",
+    #6-9 stored for future job title (Admin, Lab Tech, Pharmacit)
 }
+def get_role_digit(job_title):
+    return JOB_ROLE_DIGITS.get(job_title.strip().lower())
 
 def generate_staff_number(cursor):
     """
