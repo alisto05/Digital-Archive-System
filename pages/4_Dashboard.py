@@ -63,11 +63,11 @@ if st.session_state.logged_in_role == "Patient":
 
     with tab4:
         st.subheader("Recent Activity")
-        activity = [
-            {"Action": "Lab Report viewed", "By": "Dr. Smith", "Date": "2026-08-03"},
-            {"Action": "ID Document uploaded", "By": "You", "Date": "2026-08-02"},
-        ]
-        st.dataframe(activity)
+        activity = get_recent_activity_for_patient(st.session_state.patient_id)
+        if activity:
+            st.dataframe(activity)
+        else:
+            st.info("No activity yet.")
 
 elif st.session_state.logged_in_role == "Staff":
     tab1, tab2, tab3 = st.tabs(["Overview", "Manage Patient Documents", "Reports"])
