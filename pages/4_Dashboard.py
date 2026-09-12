@@ -1,5 +1,6 @@
 import streamlit as st
 from nav import nav_bar
+from db import get_recent_activity_for_patient
 
 
 if "all_documents" not in st.session_state:

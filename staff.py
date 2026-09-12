@@ -34,7 +34,7 @@ def generate_staff_number(cursor, role_digit):
 
 def generate_username(first_name, staff_number, job_title):
     name_part = first_name[:6]
-    digit_only = "".join(ch for ch in staff_number if ch.isdigit())
+    digits_only = "".join(ch for ch in staff_number if ch.isdigit())
     number_part = digits_only[-2:]
     title_part = job_title[0].upper()
 
@@ -61,7 +61,7 @@ def generate_strong_password(length= 12):
 
     all_chars = lowercase + uppercase + digits + symbols
     remaining_length = length - len(password_chars)
-    password_chars += [secrets(all_chars) for _ in range(remaining_length)]
+    password_chars += [secrets.choice(all_chars) for _ in range(remaining_length)]
 
     secrets.SystemRandom().shuffle(password_chars)
 
@@ -78,7 +78,7 @@ def create_staff_account():
         typed_title = input("Job Title (Doctor/ Nurse/ Receptionist): ").strip()
         role_digit = get_role_digit(typed_title)
         if role_digit is None:
-            known - ", ".join(t.title() for t in JOB_ROLE_DIGITS)
+            known_titles = ", ".join(t.title() for t in JOB_ROLE_DIGITS)
             print(f"Unknown job title. Known titles: {known_titles}")
 
     job_title = typed_title.title()

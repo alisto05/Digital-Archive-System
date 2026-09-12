@@ -114,7 +114,7 @@ def get_pending_patients():
     conn.close()
     return results
 
-def update_patient_status(patient_id, new_status):
+def update_patient_status(patient_id, new_status, reviewed_by_staff_id):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(""" 
