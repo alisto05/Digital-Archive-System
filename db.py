@@ -113,3 +113,11 @@ def get_pending_patients():
     cursor.close()
     conn.close()
     return results
+
+def update_patient_status(patient_id, new_status):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE patients SET status = %s WHERE patient_id = %s", (new_status, patient_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
