@@ -120,9 +120,9 @@ def update_patient_status(patient_id, new_status, reviewed_by_staff_id):
     cursor.execute(""" 
     UPDATE patients
     SET status = %s,
-        reviewed_by_staff_if = %s,
+        reviewed_by_staff_id = %s,
         reviewed_at = NOW()
-    WHERE patients_id = %s
+    WHERE patient_id = %s
     """,
     (new_status, reviewed_by_staff_id, patient_id)
     )
@@ -133,7 +133,7 @@ def update_patient_status(patient_id, new_status, reviewed_by_staff_id):
 def format_staff_display_name(job_title, courtesy_title, last_name):
     if job_title == "Doctor":
         return f"Dr. {last_name}"
-    return f"{job_title} {courtesy_title or ''} {last_name}".replace(" ", " ").strip()
+    return f"{job_title} {courtesy_title or ''} {last_name}".replace("  ", " ").strip()
 
 def get_recent_activity_for_patient(patient_id):
     conn = get_connection()

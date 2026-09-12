@@ -110,7 +110,7 @@ def create_staff_account():
     print(f" Staff Number:  {staff_number}")
     print(f" Password:      {plain_password}")
     if courtesy_title:
-        print(f"Will display to patients as: Dr. {job_title} {courtesy_title} {last_name}")
+        print(f"Will display to patients as: {job_title} {courtesy_title} {last_name}")
     else:
         print(f" Will display to patients as Dr. {last_name}")
     confirm = input("\nCreate this account? (y/n): ").strip().lower()
