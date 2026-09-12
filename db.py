@@ -86,3 +86,16 @@ def get_patient_login_data(username):
     conn.close()
     return result
 
+def get_staff_login_data(username):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary= True)
+    cursor.execute(""" 
+    SELECT u.user_id, u.password_hash, s.staff_id, s.first_name, s.last_name
+    From users u
+    JOIN staff s ON s.user_id = u.user_id
+    WHERE U.username = %s AND u.role = 'STAFF'
+    """, (username,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
