@@ -44,6 +44,29 @@ def username_exists(cursor, username):
     cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
     return cursor.fetchone() is not None
 
+def generate_strong_password(length= 12):
+    if length < 10:
+        length = 10
+    lowercase = string.ascii_lowercase
+    uppercase = string.ascii_uppercase
+    digits = string.digits
+    symbols = "!@#$%^&*"
+
+    password_chars = [
+        secrets.choice(lowercase),
+        secrets.choice(uppercase),
+        secrets.choice(digits),
+        secrets.choice(symbols),
+    ]
+
+    all_chars = lowercase + uppercase + digits + symbols
+    remaining_length = length - len(password_chars)
+    password_chars += [secrets(all_chars) for _ in range(remaining_length)]
+
+    secrets.SystemRandom().shuffle(password_chars)
+
+    return "".join(password_chars)
+
 def generate_staff_number(cursor):
     """
     Wantt to build a staff number that takes/ starts with 'S-'
