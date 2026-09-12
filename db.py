@@ -99,3 +99,17 @@ def get_staff_login_data(username):
     cursor.close()
     conn.close()
     return result
+
+def get_pending_patients():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary= True)
+    cursor.execute(""" 
+    SELECT patient_id, first_name, last_name, id_number, created_at
+    FROM patients
+    WHERE status = 'PENDING'
+    ORDER BY created_at ASC
+    """)
+    results = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return results
