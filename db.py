@@ -134,3 +134,33 @@ def format_staff_display_name(job_title, courtesy_title, last_name):
     if job_title == "Doctor":
         return f"Dr. {last_name}"
     return f"{job_title} {courtesy_title or ''} {last_name}".replace(" ", " ").strip()
+
+def get_recent_activity_for_patient(patient_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary= True)
+    cursor.execute(""" 
+    SELECT p.status, p.reviewed_at,
+        s.job_title, s.courtesy_title, s.last_name
+    FROM patients p
+    LEFT JOIN staff s ON s.staff_id = p.reviewed_by_staff_id
+    WHERE p.patient_id = %s
+    """,
+    (patient_id,)
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not row or not row["reviewed_at"]:
+        return []
+
+    action = "Registration approved" if row["status"] == "APPROVED" else "Registration rejected"
+    display_name = format_staff_display_name(
+        row["job_title"], row["courtesy_title"], row["last_name"]
+    )
+
+    return [{
+        "Action": action,
+        "By": display_name,
+        "Date": row["reviewed_at"].strftime("%Y-%m-%d")
+    }]
