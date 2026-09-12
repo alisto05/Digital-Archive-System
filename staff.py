@@ -123,7 +123,32 @@ def create_staff_account():
 
     password_hash = hash_password(plain_password)
 
+    args = (
+        username, password_hash, first_name, last_name,
+        staff_number, job_title, department,
+        0
+    )
 
+    try:
+        result_args = cursor.callproc("sp_register_staff", args)
+        conn.commit()
+        new_staff_id = result_args[-1]
+
+        if courtesy_title:
+            cursor.execute(
+                "UPDATE staff SET courtesy_title = %s WHERE staff_id = %s",
+                (courtesy_title, new_staff_id)
+            )
+            conn.commit()
+
+        print(f"\nStaff account created. staff_id = {new_staff_id}")
+        print("Give the username and password above to the new staff member securely")
+        print("(not over an unsercured chat/ email - this password is shown only once here).")
+
+    except mysql_errors.IntegrityError:
+        conn.rollback()
+        print("\nFailed: That username or Staff Number is already in use.")
+        
     
 
 def generate_staff_number(cursor):
