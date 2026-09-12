@@ -3,6 +3,12 @@ import secrets
 from db import get_connection, hash_password
 from mysql.connector import errors as mysql_errors
 
+JOB_ROLE_DIGITS = {
+    "doctor": "1",
+    "nurse": "4"
+    "receptionist": "5"
+}
+
 def generate_staff_number(cursor):
     """
     Wantt to build a staff number that takes/ starts with 'S-'
