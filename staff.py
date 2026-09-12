@@ -16,13 +16,13 @@ def get_role_digit(job_title):
     return JOB_ROLE_DIGITS.get(job_title.strip().lower())
 
 def generate_staff_number(cursor, role_digit):
-    pattern = f"S-{role_digit}_______"
+    pattern = f"S-{role_digit}_______" #S- + role digit + exactly 7 numbers
     cursor.execute("SELECT staff_number FROM staff WHERE staff_number LIKE %s", (pattern,))
     existing_numbers = cursor.fetchall()
 
     highest_seq = 0
     for (staff_number,) in existing_numbers:
-        seq_part = staff_number[3:]
+        seq_part = staff_number[3:] # striping "S-" and the role digit
         seq = int(seq_part)
         if seq > highest_seq:
             highest_seq = seq
@@ -31,6 +31,14 @@ def generate_staff_number(cursor, role_digit):
     padded = str(next_seq).zfill(7)
 
     return f"S-{role_digit}{padded}"
+
+def generate_username(first_name, staff_number, job_title):
+    name_part = first_name[:6]
+    digit_only = "".join(ch for ch in staff_number if ch.isdigit())
+    number_part = digits_only[-2:]
+    title_part = job_title[0].upper()
+
+    return f"S-{name_part}{number_part}&{title_part}"
 
 def generate_staff_number(cursor):
     """
