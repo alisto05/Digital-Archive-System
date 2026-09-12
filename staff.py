@@ -148,8 +148,18 @@ def create_staff_account():
     except mysql_errors.IntegrityError:
         conn.rollback()
         print("\nFailed: That username or Staff Number is already in use.")
-        
-    
+
+    except mysql_errors.Error as e:
+        conn.rollback()
+        print(f"\nDatabase error: {e}")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
+if __name__ == "__main__":
+    create_staff_account()
 
 def generate_staff_number(cursor):
     """
