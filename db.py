@@ -71,3 +71,18 @@ def register_patient(
     finally:
         cursor.close()
         conn.close()
+
+def get_patient_login_data(username):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary= True)
+    cursor.execute(""" 
+    SELECT u.user_id, u.password_hash, p'patient_id, p.status, p.preferred_name
+    FROM users u
+    JOIN patients p ON p.user_id = u.user_id
+    WHERE u.username = %s AND u.role = 'PATIENT'
+    """, (username,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
