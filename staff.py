@@ -40,6 +40,10 @@ def generate_username(first_name, staff_number, job_title):
 
     return f"S-{name_part}{number_part}&{title_part}"
 
+def username_exists(cursor, username):
+    cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
+    return cursor.fetchone() is not None
+
 def generate_staff_number(cursor):
     """
     Wantt to build a staff number that takes/ starts with 'S-'
