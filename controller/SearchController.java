@@ -16,10 +16,7 @@ public class SearchController {
         this.searchDao = searchDao;
     }
 
-    /**
-     * Records a search event. In a real app this would sit alongside the actual
-     * search query logic — call your search here, then log the term + result count.
-     */
+   
     @PostMapping
     public ResponseEntity<Void> recordSearch(@Valid @RequestBody SearchRequest request) {
         searchDao.recordSearch(request.userId(), request.searchTerm(),
