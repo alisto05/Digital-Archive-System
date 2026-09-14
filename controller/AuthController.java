@@ -33,8 +33,7 @@ public class AuthController {
 
         Long userId = user != null ? ((Number) user.get("user_id")).longValue() : null;
 
-        // sp_record_login_attempt fires the audit-log trigger and, on success,
-        // updates users.last_login_at — regardless of outcome, log the attempt.
+       
         long loginId = authDao.recordLoginAttempt(userId, request.username(), success, ip);
 
         if (!success) {
@@ -46,8 +45,7 @@ public class AuthController {
                 "loginId", loginId,
                 "userId", userId,
                 "role", user.get("role")
-                // In a real deployment, issue a session token / JWT here instead of
-                // just returning the raw user id.
+               
         ));
     }
 
