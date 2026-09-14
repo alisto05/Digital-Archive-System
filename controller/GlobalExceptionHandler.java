@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<Map<String, Object>> handleDataAccess(DataAccessException ex) {
-        // Avoid leaking raw SQL/driver details to clients; log the full exception server-side instead.
+       
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "A database error occurred"));
     }
