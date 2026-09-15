@@ -100,6 +100,16 @@ def get_staff_login_data(username):
     conn.close()
     return result
 
+def create_staff_account_web(first_name, last_name, job_title_typed, courtesy_title, email, specialization, department):
+    """
+    Web-form version of staff_setup.py's create_staff_account(), used from the
+    Admin Dashboard's 'Add Staff Member' panel. Returns
+    (success, message, credentials_dict_or_None).
+    """
+    from staff_setup import get_role_digit, generate_staff_number, generate_username, generate_strong_password
+    
+
+
 def get_pending_patients():
     conn = get_connection()
     cursor = conn.cursor(dictionary= True)
