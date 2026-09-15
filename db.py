@@ -116,7 +116,19 @@ def create_staff_account_web(first_name, last_name, job_title_typed, courtesy_ti
     conn = get_connection()
     cursor = conn.cursor()
 
-    
+    try:
+        staff_number = generate_staff_number(cursor, role_digit)
+        username = generate_username(first_name, staff_number, job_title)
+        base_username = username
+        attempt = 1
+        cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
+        while cursor.fetchone() is not None:
+            attempt += 1
+            username = f"{base_username}{attempt}"
+            cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
+
+        plain_password = generate_strong_password()
+        password_hash = hash_password(plain_password)
 
 
 
