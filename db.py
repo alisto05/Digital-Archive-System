@@ -9,7 +9,7 @@ def get_connection():
     return mysql.connector.connect(
         host = "localhost",
         user = "root",
-        #password = "password",
+        password = "@Zingisa24",
         database = "syncpoint_archive"
     )
 
@@ -93,7 +93,7 @@ def get_staff_login_data(username):
     SELECT u.user_id, u.password_hash, s.staff_id, s.first_name, s.last_name
     FROM users u
     JOIN staff s ON s.user_id = u.user_id
-    WHERE U.username = %s AND u.role = 'STAFF'
+    WHERE u.username = %s AND u.role = 'STAFF'
     """, (username,))
     result = cursor.fetchone()
     cursor.close()

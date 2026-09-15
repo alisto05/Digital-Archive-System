@@ -68,7 +68,7 @@ def generate_strong_password(length= 12):
     return "".join(password_chars)
 
 def create_staff_account():
-    print("=== SyncPoint Staff Account Setup ===\n")
+    print("==== SyncPoint Staff Account Setup ====\n")
 
     first_name = input("First Name: ").strip()
     last_name = input("Last Name: ").strip()
