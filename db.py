@@ -107,7 +107,17 @@ def create_staff_account_web(first_name, last_name, job_title_typed, courtesy_ti
     (success, message, credentials_dict_or_None).
     """
     from staff_setup import get_role_digit, generate_staff_number, generate_username, generate_strong_password
+
+    role_digit = get_role_digit(job_title_typed)
+    if role_digit is None:
+        return False, "Unknown Job title.", None
+
+    job_title = job_title_typed.title()
+    conn = get_connection()
+    cursor = conn.cursor()
+
     
+
 
 
 def get_pending_patients():
