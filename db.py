@@ -100,54 +100,6 @@ def get_staff_login_data(username):
     conn.close()
     return result
 
-#Creating a staff account
-def create_staff_account_web(first_name, last_name, job_title_typed, courtesy_title, email, specialization, department):
-    """
-    Web-form version of staff_setup.py's create_staff_account(), used from the
-    Admin Dashboard's 'Add Staff Member' panel. Returns
-    (success, message, credentials_dict_or_None).
-    """
-    from staff_setup import get_role_digit, generate_staff_number, generate_username, generate_strong_password
-
-    role_digit = get_role_digit(job_title_typed)
-    if role_digit is None:
-        return False, "Unknown Job title.", None
-
-    job_title = job_title_typed.title()
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    try:
-        #generating a staff number
-        staff_number = generate_staff_number(cursor, role_digit)
-
-        #generating a username
-        username = generate_username(first_name, staff_number, job_title)
-
-        #saving the original username
-        base_username = username
-        attempt = 1
-
-        #check if the username exists or not
-        cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
-        while cursor.fetchone() is not None:
-            attempt += 1
-            username = f"{base_username}{attempt}"
-            cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
-
-        plain_password = generate_strong_password()
-        password_hash = hash_password(plain_password)
-
-#Registering/ putting staff Members in the database and get back with new staff ID
-        args = (
-            username, password_hash, first_name, last_name,
-            staff_number, job_title, department,
-            0
-        )
-        result_args = cursor.callproc("sp_register_staff", args)
-        conn.commit()
-        new_staff_id = result_args[-1]
-
 
 def get_pending_patients():
     conn = get_connection()
