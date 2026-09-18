@@ -63,7 +63,7 @@ public class DocumentDao {
         return ((Number) out.get("out_document_id")).longValue();
     }
 
-    /** Powers the "My Documents" tab, with optional filename/type search. */
+   
     public List<Map<String, Object>> getDocumentsForPatient(long patientId, String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
             return jdbcTemplate.queryForList("""
@@ -86,7 +86,7 @@ public class DocumentDao {
                 """, patientId, like, like);
     }
 
-    /** Powers the staff Search page — by patient name, ID number, or document type. */
+   
     public List<Map<String, Object>> searchDocumentsForStaff(String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
             return jdbcTemplate.queryForList("""
