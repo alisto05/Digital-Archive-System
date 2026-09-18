@@ -20,13 +20,7 @@ public class AdminController {
         this.adminDao = adminDao;
     }
 
-    /**
-     * Creates a new Admin account. NOTE: there is currently no auth/session
-     * check gating this endpoint — anyone who can reach the API can call it.
-     * Before this goes anywhere near production, this needs to require an
-     * already-authenticated Admin caller (a session token / role check),
-     * the same gap that already exists on /api/staff/register.
-     */
+    
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody AdminRegistrationRequest request) {
         if (adminDao.usernameExists(request.username())) {
