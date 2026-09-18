@@ -43,7 +43,7 @@ public class DocumentRequestDao {
         return ((Number) out.get("out_request_id")).longValue();
     }
 
-    /** Powers the "Requested Documents" table on the patient Dashboard. */
+  
     public List<Map<String, Object>> getDocumentRequestsForPatient(long patientId) {
         return jdbcTemplate.queryForList("""
                 SELECT dr.request_id, dt.type_name, dr.request_reason, dr.status, dr.requested_at
