@@ -35,14 +35,7 @@ public class StaffDao {
                 );
     }
 
-    /** courtesy_title isn't part of sp_register_staff's signature (it wasn't in
-     * the original procedure), so it's set with a follow-up UPDATE — same
-     * approach staff.py already uses.
-     *
-     * username is passed explicitly (not read from r.username()) because
-     * StaffController generates the real username server-side — whatever the
-     * client sent in the request body is just a placeholder to satisfy
-     * validation and must never be what actually gets stored. */
+  
     public long registerStaff(StaffRegistrationRequest r, String passwordHash,
                                String staffNumber, String username) {
         MapSqlParameterSource params = new MapSqlParameterSource()
