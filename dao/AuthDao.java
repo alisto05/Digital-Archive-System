@@ -39,7 +39,7 @@ public class AuthDao {
                 .declareParameters(new SqlParameter("p_login_id", Types.BIGINT));
     }
 
-    /** Mirrors db.get_patient_login_data exactly. */
+   
     public Map<String, Object> getPatientLoginData(String username) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT u.user_id, u.password_hash, p.patient_id, p.status, p.preferred_name
@@ -50,7 +50,7 @@ public class AuthDao {
         return rows.isEmpty() ? null : rows.get(0);
     }
 
-    /** Mirrors db.get_staff_login_data exactly. */
+ 
     public Map<String, Object> getStaffLoginData(String username) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT u.user_id, u.password_hash, s.staff_id, s.first_name, s.last_name
@@ -61,7 +61,7 @@ public class AuthDao {
         return rows.isEmpty() ? null : rows.get(0);
     }
 
-    /** Same pattern as getStaffLoginData, against the new admins table. */
+  
     public Map<String, Object> getAdminLoginData(String username) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT u.user_id, u.password_hash, a.admin_id, a.first_name, a.last_name
