@@ -33,8 +33,7 @@ public class ApprovalDao {
                 """, newStatus, reviewedByStaffId, patientId);
     }
 
-    /** Mirrors db.get_recent_activity_for_patient, including the same
-     * "Dr. Lastname" vs "JobTitle CourtesyTitle Lastname" display-name logic. */
+    
     public List<Map<String, Object>> getRecentActivityForPatient(long patientId) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT p.status, p.reviewed_at, s.job_title, s.courtesy_title, s.last_name
