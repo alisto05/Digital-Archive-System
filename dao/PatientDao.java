@@ -51,8 +51,6 @@ public class PatientDao {
                 );
     }
 
-    /** New patients always start in status = PENDING (the table default) — matches
-     * the approval workflow db.py/pages/8_Approvals.py already implement. */
     public long registerPatient(PatientRegistrationRequest r, String passwordHash) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("p_username", r.username())
@@ -83,7 +81,7 @@ public class PatientDao {
         return ((Number) out.get("out_patient_id")).longValue();
     }
 
-    /** Powers the "My Profile" tab — joins current address/contact/medical-aid rows. */
+   
     public Map<String, Object> getPatientProfile(long patientId) {
         return jdbcTemplate.queryForMap("""
                 SELECT p.title, p.first_name, p.middle_name, p.last_name, p.preferred_name,
