@@ -1,4 +1,20 @@
+import base64
+from pathlib import Path
+
 import streamlit as st
+
+
+def load_css(path="assets/home.css"):
+    """Read a CSS file and inject it into the page."""
+    css = Path(path).read_text(encoding="utf-8")
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+
+
+def img_src(path):
+    """Turn an image file into text that an HTML <img src="..."> can use."""
+    data = base64.b64encode(Path(path).read_bytes()).decode()
+    return f"data:image/png;base64,{data}"
+
 
 def nav_bar():
     st.markdown(
@@ -38,4 +54,3 @@ def footer():
     with col4:
         st.write("**For Staff**")
         st.page_link("pages/1_Login.py", label= "Staff Login", use_container_width= True)
-        
