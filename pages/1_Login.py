@@ -72,5 +72,6 @@ elif st.session_state.selected_role == "Staff":
             st.session_state.logged_in_user = f"{record['first_name']} {record['last_name']}"
             st.session_state.logged_in_role = "Staff"
             st.session_state.staff_id = record["staff_id"]
-            st.switch_page("pages/4_Dashboard.py")           
+            st.switch_page("pages/4_Dashboard.py") 
+          
             
