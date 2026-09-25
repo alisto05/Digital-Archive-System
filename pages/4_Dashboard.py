@@ -138,7 +138,7 @@ elif st.session_state.logged_in_role == "Staff":
         if not stats_ok:
             st.error(stats.get("error", "Could not load dashboard stats."))
         else:
-            st.metirc("pending_approval", stats["pending_approvals"])
+            st.metric("pending_approval", stats["pending_approvals"])
 
     with tab2:
         st.subheader("Patient Documents")
