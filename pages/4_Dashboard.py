@@ -213,10 +213,7 @@ elif st.session_state.logged_in_role == "Admin":
 
         with tab1:
             st.header(f"Welcome back, {st.session_state.logged_in_user}")
-            #st.info(
-                #"Overview counts (total patients, staff by role, pending approvals)"
-                #NOT AVAILABLE
-            #)
+            st.caption("More Overview stats will appear here.")
 
         with tab2:
             st.info(
