@@ -64,5 +64,26 @@ def logout(login_id):
             params={"loginId": login_id},
             timeout= TIMEOUT_SECONDS,
         )
-    except requests.exceptions.RequestExeception:
+    except requests.exceptions.RequestException:
         pass
+
+#Calls GET/api/documents/staff-search. Used for Admin "Documents Reports" tab
+
+def get_documents_for_staff(searching_user_id, search_term: str | None = None):
+    params = {"searchingUserId": searching_user_id}
+    if search_term:
+        params["search"] = search_term
+    return _request("GET", "/api/documents/staff-search", params= params)
+
+#Used for the Staff overview/ Reports tabs
+
+def get_staff_dashboard_stats():
+    return _request("GET", "/api/dashboard/staff-stats")
+
+#Used for staff "Manage Patient Documents" tab
+def get_pending_documents_for_staff():
+    return _request("GET", "/api/documents/pending-review")
+
+#calls GET /api/patients/{patientId}/profile
+def get_patient_profile(patient_id):
+    return _request("GET", f"/api/patients/{patient_id}/profile")
