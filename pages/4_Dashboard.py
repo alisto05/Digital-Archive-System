@@ -1,13 +1,9 @@
 import streamlit as st
 from nav import nav_bar
 from db import get_recent_activity_for_patient
+from backend_api import(get_pending_documents_for_staff, get_staff_dashboard_stats, get_documents_for_staff,
+                        review_document, get_patient_profile, get_patient_documents, get_document_requests_for_patient,)
 
-
-if "all_documents" not in st.session_state:
-    st.session_state.all_documents = [
-            {"Patient": "Alisto", "Document Type": "Lap Report", "Status": "Pending"},
-            {"Patient": "Khaya", "Document Type": "ID", "Status": "Approved"},
-            ]
     
 if "selected_role" not in st.session_state:
     st.session_state.selected_role = None
@@ -25,7 +21,20 @@ if st.session_state.logged_in_role == "Patient":
 
     with tab1:
         st.header(f"Welcome back, {st.session_state.logged_in_user}")
-        st.warning("You have 1 pending document request. See 'My Documents' tab.")
+        requests_ok, document_requests = get_document_requests_for_patient(st.session_state.patient_id)
+
+        if not requests_ok:
+            st.error(document_requests.get("error", "Could not load document requests."))
+        else:
+            pending_requests = [r for r in document_requests if r["status"] == "PENDING"]
+            if not pending_requests:
+                st.success("No pending document requests.")
+            else:
+                needed = ", ".join(r["type_name"] for r in pending_requests)
+                st.warning(
+                    f"You have {len(pending_requests)} pending document request(s) - "
+                    f"{needed}. See 'My Documents' tab."
+                )
         
     with tab2:
         st.caption("**Title**")
