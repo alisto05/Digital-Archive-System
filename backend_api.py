@@ -32,3 +32,26 @@ def _request(method, path, **kwargs):
         data = {}
     return False, {"error": data.get("error", f"Request failed ({response.status_code}).")}
 
+#calls the POST/api/auth/login/admin
+
+def login_admin(username: str, password: str):
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/auth/login/admin",
+            json= {"username": username, "password": password},
+            timeout= TIMEOUT_SECONDS,
+        )
+    except requests.exceptions.RequestException:
+        return False, {"error": f"Could not reach the backend. Is it running on {BASE_URL}?"}
+
+    try:
+        data = response.json()
+    except ValueError:
+        data = {}
+
+        if response.status_code == 200:
+            return True, data
+
+        return False, {"error": data.get("error", "Login Failed")}
+
+    
