@@ -54,4 +54,15 @@ def login_admin(username: str, password: str):
 
         return False, {"error": data.get("error", "Login Failed")}
 
-    
+#Calls POST/api/auth/logout, login endpoints never establish a real session either so this
+#call will also 401 until that's fixed.
+
+def logout(login_id):
+    try:
+        requests.post(
+            f"{BASE_URL}/api/auth/logout",
+            params={"loginId": login_id},
+            timeout= TIMEOUT_SECONDS,
+        )
+    except requests.exceptions.RequestExeception:
+        pass
