@@ -1,6 +1,7 @@
 import streamlit as st
 from nav import nav_bar
 from db import get_patient_login_data, get_staff_login_data, verify_password
+from backend_api import login_admin
 
 nav_bar()
 
@@ -63,6 +64,7 @@ if st.session_state.selected_role == "Patient":
             st.session_state.logged_in_role = "Patient"
             st.session_state.patient_id = record["patient_id"]
             st.switch_page("pages/4_Dashboard.py")
+            
 elif st.session_state.selected_role == "Staff":
     staff_username = st.text_input("Enter Your Staff Username")
     staff_password = st.text_input("Enter Your Password", type= "password")
