@@ -138,7 +138,7 @@ elif st.session_state.logged_in_role == "Staff":
         if not stats_ok:
             st.error(stats.get("error", "Could not load dashboard stats."))
         else:
-            st.info(f"{stats['pending_approval']} Documents pending approval")
+            st.metirc("pending_approval", stats["pending_approvals"])
 
     with tab2:
         st.subheader("Patient Documents")
@@ -213,10 +213,10 @@ elif st.session_state.logged_in_role == "Admin":
 
         with tab1:
             st.header(f"Welcome back, {st.session_state.logged_in_user}")
-            st.info(
-                "Overview counts (total patients, staff by role, pending approvals)"
-                ##NOT AVAILABLE
-            )
+            #st.info(
+                #"Overview counts (total patients, staff by role, pending approvals)"
+                #NOT AVAILABLE
+            #)
 
         with tab2:
             st.info(
@@ -244,4 +244,4 @@ if "confirm_signout" not in st.session_state:
     st.session_state.confirm_signout = False
 
 if st.button("Sign Out"):
-    st.switch_page("pages/7_SingOut.py")
+    st.switch_page("pages/7_SignOut.py")
