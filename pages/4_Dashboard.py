@@ -74,39 +74,54 @@ if st.session_state.logged_in_role == "Patient":
            ####### help= "Coming soon"
         )
 
-            
-        st.write("Mr")
-        st.caption("**First Name**")
-        st.write("Alizwa")
-        st.caption("**Middle Name**")
-        st.write("")
-        st.caption("**Date of Birth**")
-        st.write("**YYYY-MM-DD**")
-        st.caption("**ID Number**")
-        st.write("")
-        st.caption("**Address**")
-        st.write("")
-        st.caption("**City**")
-        st.write("")
-        st.caption("**Province**")
-        st.write("")
-        st.caption("**Phone Number**")
-        st.write("")
-        st.caption("**Email**")
-        st.write("")
-        st.button("REQUEST CHANGE")
-
     with tab3:
-        search_term = st.text_input("Search your documents")
         st.subheader("Requested Documents")
-        documents = [
-            {"Document Needed": "Proof of Residence", "Requested by": "Staff", "Status": "Pending"},
-        ]
-        st.dataframe(documents)
+        requests_ok, document_requests = get_document_requests_for_patient(st.session_state.patient_id)
 
+        if not requests_ok:
+            st.error(document_requests.get("error", "Could not load document requests."))
+        elif not document_requests:
+            st.info("No document requests from staff right now.")
+        else:
+            st.dataframe([
+                {
+                    "Document Needed": r["type_name"],
+                    "Reason": r.get("request_reason") or "-",
+                    "Status": r["status"],
+                    "Requested At": r["requested_at"],
+                }
+                for r in document_requests
+            ])
 
+        st.divider()
+        st.subheader("Your Uploaded Documents")
+        search_term = st.text_input("Search your documents")
+        docs_ok, documents = get_patient_documents(st.session_state.patient_id, search_term)
+
+        if not docs_ok:
+            st.error(documents.get("error", "Could not load your documents."))
+        elif not documents:
+            st.info("You haven't uploaded any documents yet.")
+        else:
+            st.dataframe([
+                {
+                    "Document Type": d["type_name"],
+                    "File": d["original_filename"],
+                    "Status": d["status"],
+                    "Uploaded At": d["uploaded_at"],
+                    "Rejection Reason": d.get("rejection_reason") or "-"
+                }
+                for d in documents
+            ])
+
+        st.divider()
         st.subheader("Upload a document")
-        upoloaded_file = st.file_uploader("Upload here", type= ["pdf"])
+        st.file_uploader(
+            "Upload here", type= ["pdf"], disabled= True,
+            help= "Coming soon"
+        )
+
+    
 
     with tab4:
         st.subheader("Recent Activity")
