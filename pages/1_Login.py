@@ -80,3 +80,8 @@ elif st.session_state.selected_role == "Staff":
             st.session_state.staff_id = record["staff_id"]
             st.switch_page("pages/4_Dashboard.py") 
 
+elif st.session_state.selected_role == "Admin":
+    admin_username = st.text_input("Enter Your Admin Username")
+    admin_password = st.text_input("Enter Your Password", type= "password", key= "admin_password")
+
+    
