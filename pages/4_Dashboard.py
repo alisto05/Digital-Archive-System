@@ -37,7 +37,44 @@ if st.session_state.logged_in_role == "Patient":
                 )
         
     with tab2:
-        st.caption("**Title**")
+        profile_ok, profile = get_patient_profile(st.session_state.patient_id)
+
+        if not profile_ok:
+            st.error(profile.get("error", "Could not load your profile."))
+        else:
+            def show_field(label, value):
+                st.caption(f"**{label}**")
+                st.write(value if value not in (None, "") else "--")
+
+            show_field("Title", profile.get("title"))
+            show_field("First Name", profile.get("first_name"))
+            show_field("Middle Name", profile.get("middle_name"))
+            show_field("Last Name", profile.get("last_name"))
+            show_field("Preferred Name", profile.get("preferred_name"))
+            show_field("Date of Birth", profile.get("date_of_birth"))
+            show_field("ID Number", profile.get("id_number"))
+            show_field("Address", profile.get("address_line"))
+            show_field("City", profile.get("city"))
+            show_field("Province", profile.get("province"))
+            show_field("Postal Code", profile.get("postal_code"))
+            show_field("Country", profile.get("country"))
+            show_field("Mobile Phone", profile.get("mobile_phone"))
+            show_field("Home Phone", profile.get("home_phone"))
+            show_field("Email", profile.get("email"))
+
+            if profile.get("has_medical_aid"):
+                show_field("Medical Aid Provider", profile.get("provider"))
+                show_field("Membership Number", profile.get("membership_number"))
+            else:
+                st.caption("**Medical Aid**")
+                st.write("Not on medical aid")
+
+        st.button(
+            "REQUEST CHANGE", disabled= True,
+           ####### help= "Coming soon"
+        )
+
+            
         st.write("Mr")
         st.caption("**First Name**")
         st.write("Alizwa")
