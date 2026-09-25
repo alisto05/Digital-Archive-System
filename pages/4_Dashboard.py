@@ -208,48 +208,40 @@ elif st.session_state.logged_in_role == "Staff":
             with col5:
                 st.metric("Rejected Documents", stats["rejected_documents"])
 
+elif st.session_state.logged_in_role == "Admin":
+        tab1, tab2, tab3, tab4 = st.tabs(["Overview", "Manage Staff", "Document Reports", "Analytics"])
 
-        documents_to_show = st.session_state.all_documents
+        with tab1:
+            st.header(f"Welcome back, {st.session_state.logged_in_user}")
+            st.info(
+                "Overview counts (total patients, staff by role, pending approvals)"
+                ##NOT AVAILABLE
+            )
 
-        if search_term:
-            new_docu = []
-            
-            for d in st.session_state.all_documents:
-                if search_term in d["Patient"]:
-                    new_docu.append(d)
-            documents_to_show = new_docu
+        with tab2:
+            st.info(
+                "Manage Staff (staff list + add staff) is coming soon"
+            )
 
-        for d in documents_to_show:
-            col1, col2, col3, col4, col5 = st.columns(5)
+        with tab3:
+            st.subheader("Document Reports")
+            search_term = st.text_input("Search by patient name, ID, or doument type", key= "admin_doc_search")
+            success, documents = get_documents_for_staff(st.session_state.user_id, search_term)
 
-            with col1:
-                st.write(d["Patient"])
-            with col2:
-                st.write(d["Document Type"])
-            with col3:
-                st.write(d["Status"])
-            with col4:
-                if d["Status"] == "Pending":
-                    if st.button("Approve", key= f"approve_{d['Patient']}"):
-                        d["Status"] = "Approved"
-                else:
-                    st.write("__")
-            with col5:
-                if d["Status"] == "Pending":
-                    if st.button("Reject", key= f"reject_{d['Patient']}"):
-                        d["Status"] = "Rejected"
-                else:
-                    st.write("__")
+            if not success:
+                st.error(documents.get("error", "Could not load documents."))
+            elif not documents:
+                st.info("No documents found.")
+            else:
+                st.dataframe(documents)
 
-    with tab3:
-        st.subheader("Reports")
-        st.metric("Total Documents", "24")
-        st.metric("Pending Approvals", "3")
-
+        with tab4:
+            st.info(
+                "Analytical charts coming"
+            )
 
 if "confirm_signout" not in st.session_state:
     st.session_state.confirm_signout = False
 
 if st.button("Sign Out"):
-    st.switch_page("pages/7_SignOut.py")
-
+    st.switch_page("pages/7_SingOut.py")
