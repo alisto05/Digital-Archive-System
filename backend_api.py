@@ -97,3 +97,20 @@ def get__patient_documents(patient_id, search_term: str | None = None):
 
     return _request("GET", f"/api/documents/patient/{patient_id}", params= params)
 
+#Used for patient
+#Overview (pending- request check)
+
+def get_document_requests_for_patient(patient_id):
+    return _request("GET", f"/api/document-requests/patient/{patient_id}")
+
+#"Approved/Rejected" Rejected True on success
+def review_document(document_id, new_status: str, reviewed_by_user_id, rejection_reason: str | None = None):
+    return _request(
+        "PUT",
+        f"/api/documents/{document_id}/review",
+        json= {
+            "reviewedByUserId": reviewed_by_user_id,
+            "newStatus": new_status,
+            "rejectionReason": rejection_reason,
+        },
+    )
