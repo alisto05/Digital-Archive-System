@@ -121,8 +121,6 @@ if st.session_state.logged_in_role == "Patient":
             help= "Coming soon"
         )
 
-    
-
     with tab4:
         st.subheader("Recent Activity")
         activity = get_recent_activity_for_patient(st.session_state.patient_id)
@@ -136,11 +134,39 @@ elif st.session_state.logged_in_role == "Staff":
 
     with tab1:
         st.header(f"Welcome back, {st.session_state.logged_in_user}")
-        st.info("3 Documents pending approval")
+        stats_ok, stats = get_staff_dashboard_stats()
+        if not stats_ok:
+            st.error(stats.get("error", "Could not load dashboard stats."))
+        else:
+            st.info(f"{stats['pending_approval']} Documents pending approval")
+
     with tab2:
         st.subheader("Patient Documents")
         search_term = st.text_input("Search by patient name, ID or Document type")
 
+        docs_ok, pending_documents = get_pending_documents_for_staff()
+
+        if not docs_ok:
+            st.error(pending_documents.get("error", "Could not load pending documents."))
+
+        else:
+            documents_to_show = pending_documents
+
+            if search_term:
+                search_lower = search_term.lower()
+                documents_to_show = [
+                    d for d in pending_documents
+                    if search_lower in f"{d['first_name']} {d['last_name']}".lower()
+                    or search_lower in d["type_name"].lower()
+                ]
+
+            if not documents_to_show:
+                st.info("No pending documents right now.")
+
+            for d in documents_to_show:
+                col1, col2, col3, col4, col5 = st.columns(5)
+
+                
 
         documents_to_show = st.session_state.all_documents
 
