@@ -21,7 +21,7 @@ st.write("")
 st.divider()
 
 #This separates the Patient and Staff using a border
-col1, col2 = st.columns(2, border= True)
+col1, col2, col3 = st.columns(3, border= True)
 with col1:
     st.image("assets/patient-removebg.png", width= 50, use_container_width= True)
     if st.button("Patient Login"):
@@ -33,6 +33,12 @@ with col2:
     if st.button("Staff Login"):
         st.session_state.selected_role = "Staff"
     st.caption("Staff Login Here")
+
+with col3:
+    st.image("assets/admin-removebg.png", width= 50, use_container_width= True)
+    if st.button("Admin Login"):
+        st.session_state.selected_role = "Admin"
+    st.caption("Admin Login Here")
 
 #If the Pateient was clicked, this how it would look like
 if st.session_state.selected_role == "Patient":
@@ -73,5 +79,4 @@ elif st.session_state.selected_role == "Staff":
             st.session_state.logged_in_role = "Staff"
             st.session_state.staff_id = record["staff_id"]
             st.switch_page("pages/4_Dashboard.py") 
-          
-            
+
