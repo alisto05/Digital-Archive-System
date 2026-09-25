@@ -13,3 +13,22 @@ def _no_session_error(status_code):
         "endpoints reject every request - flag this to the backend team."
     )
 
+
+def _request(method, path, **kwargs):
+    try:
+        response = requests.request(method, f"{BASE_URL}{path}", timeout= TIMEOUT_SECONDS, **kwargs)
+    except requests.exceptions.RequestException:
+        return False, {"error": f"Could not reach the backend. Is it running on {BASE_URL}?"}
+    if response.status_code in (200, 201):
+        return True, response.json()
+    if  response.status_code == 204:
+        return True, {}
+    if response.status_code in (401, 403):
+        return False, {"error": _no_session_error(response.status_code)}
+
+    try:
+        data = response.json()
+    except ValueError:
+        data = {}
+    return False, {"error": data.get("error", f"Request failed ({response.status_code}).")}
+
