@@ -166,7 +166,30 @@ elif st.session_state.logged_in_role == "Staff":
             for d in documents_to_show:
                 col1, col2, col3, col4, col5 = st.columns(5)
 
-                
+                with col1:
+                    st.write(f"{d['first_name']} {d['last_name']}")
+                with col2:
+                    st.write(d["type_name"])
+                with col3:
+                    st.write(d["original_filename"])
+                with col4:
+                    if st.button("Approve", key= f"approve_{d['document_id']}"):
+                        ok, result = review_document(d["document_id"], "APPROVED", st.session_state.user_id)
+                        if ok:
+                            st.rerun()
+                        else:
+                            st.error(result.get("error", "Could not approve document."))
+
+                with col5:
+                    if st.button("Reject", key= f"reject_{d['document_id']}"):
+                        ok, result = review_document(d["document_id"], "REJECTED", st.session_state.user_id)
+                        if ok:
+                            st.rerun()
+                        else:
+                            st.error(result.get("error", "Could not reject document."))
+
+    with tab3:
+        
 
         documents_to_show = st.session_state.all_documents
 
