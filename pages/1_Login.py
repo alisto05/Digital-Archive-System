@@ -84,4 +84,16 @@ elif st.session_state.selected_role == "Admin":
     admin_username = st.text_input("Enter Your Admin Username")
     admin_password = st.text_input("Enter Your Password", type= "password", key= "admin_password")
 
-    
+    #This one goes through thee backend
+    if st.button("Login", key= "admin_login_button"):
+        success, data = login_admin(admin_username, admin_password)
+
+        if not success:
+            st.error(data.get("error", "Login Failed"))
+        else:
+            st.session_state.logged_in_user = data["displayName"]
+            st.session_state.logged_in_role = "Admin"
+            st.session_state.admin_id = data["adminId"]
+            st.session_state.user_id = data["userId"]
+            st.session_state.login_id = data["loginId"]
+            st.switch_page("pages/4_Dashboard.py")
