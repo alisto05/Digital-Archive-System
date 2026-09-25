@@ -49,10 +49,10 @@ def login_admin(username: str, password: str):
     except ValueError:
         data = {}
 
-        if response.status_code == 200:
-            return True, data
+    if response.status_code == 200:
+        return True, data
 
-        return False, {"error": data.get("error", "Login Failed")}
+    return False, {"error": data.get("error", "Login Failed")}
 
 #Calls POST/api/auth/logout, login endpoints never establish a real session either so this
 #call will also 401 until that's fixed.
@@ -90,7 +90,7 @@ def get_patient_profile(patient_id):
 
 #calls GET /api/documents/patient/{patientId}.....Used for the patient "My Documents"tab
 
-def get__patient_documents(patient_id, search_term: str | None = None):
+def get_patient_documents(patient_id, search_term: str | None = None):
     params = {}
     if search_term:
         params["search"] = search_term
