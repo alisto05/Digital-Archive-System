@@ -189,7 +189,25 @@ elif st.session_state.logged_in_role == "Staff":
                             st.error(result.get("error", "Could not reject document."))
 
     with tab3:
-        
+        st.subheader("Reports")
+        stats_ok, stats = get_staff_dashboard_stats()
+        if not stats_ok:
+            st.error(stats.get("error", "Could not load report stats."))
+        else:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Documents", stats["total_documents"])
+            with col2:
+                st.metric("Pending Approvals", stats["pending_approvals"])
+            with col3:
+                st.metric("Pending Patient Registrations", stats["pending_patient_registrations"])
+
+            col4, col5 = st.columns(2)
+            with col4:
+                st.metric("Approved Documents", stats["approved_documents"])
+            with col5:
+                st.metric("Rejected Documents", stats["rejected_documents"])
+
 
         documents_to_show = st.session_state.all_documents
 
