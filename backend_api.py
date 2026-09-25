@@ -87,3 +87,13 @@ def get_pending_documents_for_staff():
 #calls GET /api/patients/{patientId}/profile
 def get_patient_profile(patient_id):
     return _request("GET", f"/api/patients/{patient_id}/profile")
+
+#calls GET /api/documents/patient/{patientId}.....Used for the patient "My Documents"tab
+
+def get__patient_documents(patient_id, search_term: str | None = None):
+    params = {}
+    if search_term:
+        params["search"] = search_term
+
+    return _request("GET", f"/api/documents/patient/{patient_id}", params= params)
+
