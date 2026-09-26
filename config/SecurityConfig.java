@@ -17,17 +17,8 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 
-
 @Configuration
 public class SecurityConfig {
-
-    @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
-                                                          PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return new ProviderManager(provider);
-    }
 
     @Bean
     public SecurityContextRepository securityContextRepository() {
@@ -54,7 +45,7 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                       
+                        
                         .requestMatchers(HttpMethod.POST,
                                 "/api/auth/login/patient", "/api/auth/login/staff", "/api/auth/login/admin",
                                 "/api/patients/register"
@@ -62,7 +53,7 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
 
-                       
+                     
                         .requestMatchers(HttpMethod.GET,
                                 "/api/patients/*/profile",
                                 "/api/documents/patient/*",
@@ -86,7 +77,8 @@ public class SecurityConfig {
                         .hasAnyRole("STAFF", "ADMIN")
 
                        
-                        .requestMatchers("/api/staff/register", "/api/admin/register")
+                        .requestMatchers("/api/staff/register", "/api/admin/register",
+                                "/api/admin/overview", "/api/admin/staff", "/api/admin/patients")
                         .hasRole("ADMIN")
 
                         .anyRequest().denyAll()
@@ -102,3 +94,5 @@ public class SecurityConfig {
         return http.build();
     }
 }
+
+
