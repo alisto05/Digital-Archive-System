@@ -47,4 +47,36 @@ public class AdminDao {
                 "SELECT COUNT(*) FROM users WHERE username = ?", Integer.class, username);
         return count != null && count > 0;
     }
+ public Map<String, Object> getOverviewStats() {
+        return jdbcTemplate.queryForMap("""
+                SELECT
+                    (SELECT COUNT(*) FROM patients) AS total_patients,
+                    (SELECT COUNT(*) FROM patients WHERE status = 'PENDING') AS pending_patients,
+                    (SELECT COUNT(*) FROM patients WHERE status = 'APPROVED') AS approved_patients,
+                    (SELECT COUNT(*) FROM patients WHERE status = 'REJECTED') AS rejected_patients,
+                    (SELECT COUNT(*) FROM staff) AS total_staff,
+                    (SELECT COUNT(*) FROM users WHERE role = 'ADMIN') AS total_admins,
+                    (SELECT COUNT(*) FROM documents) AS total_documents,
+                    (SELECT COUNT(*) FROM documents WHERE status = 'PENDING') AS pending_documents
+                """);
+    }
+
+    public java.util.List<Map<String, Object>> getAllStaff() {
+        return jdbcTemplate.queryForList("""
+                SELECT staff_id, first_name, last_name, staff_number, job_title,
+                       courtesy_title, department, created_at
+                FROM staff
+                ORDER BY created_at DESC
+                """);
+    }
+
+    public java.util.List<Map<String, Object>> getAllPatients() {
+        return jdbcTemplate.queryForList("""
+                SELECT patient_id, first_name, last_name, id_number, status,
+                       reviewed_by_staff_id, reviewed_at, created_at
+                FROM patients
+                ORDER BY created_at DESC
+                """);
+    }
 }
+
