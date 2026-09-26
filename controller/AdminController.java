@@ -27,8 +27,24 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("error", "That username is already taken."));
         }
-        String passwordHash = PasswordUtil.hashPassword(request.password());
+        String passwordHash = passwordEncoder.encode(request.password());
         long adminId = adminDao.registerAdmin(request, passwordHash);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("adminId", adminId));
+    }
+     @GetMapping("/overview")
+    public ResponseEntity<Map<String, Object>> getOverview() {
+        return ResponseEntity.ok(adminDao.getOverviewStats());
+    }
+
+    
+    @GetMapping("/staff")
+    public ResponseEntity<List<Map<String, Object>>> getAllStaff() {
+        return ResponseEntity.ok(adminDao.getAllStaff());
+    }
+
+  
+    @GetMapping("/patients")
+    public ResponseEntity<List<Map<String, Object>>> getAllPatients() {
+        return ResponseEntity.ok(adminDao.getAllPatients());
     }
 }
