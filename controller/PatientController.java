@@ -15,14 +15,16 @@ import java.util.Map;
 public class PatientController {
 
     private final PatientDao patientDao;
+    private final PasswordEncoder passwordEncoder;
 
-    public PatientController(PatientDao patientDao) {
+    public PatientController(PatientDao patientDao, PasswordEncoder passwordEncoder) {
         this.patientDao = patientDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/register")
+   @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody PatientRegistrationRequest request) {
-        String passwordHash = PasswordUtil.hashPassword(request.password());
+        String passwordHash = passwordEncoder.encode(request.password());
         long patientId = patientDao.registerPatient(request, passwordHash);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("patientId", patientId));
     }
