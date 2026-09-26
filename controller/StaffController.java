@@ -21,11 +21,12 @@ public class StaffController {
     );
 
     private final StaffDao staffDao;
-
-    public StaffController(StaffDao staffDao) {
+    private final PasswordEncoder passwordEncoder;
+ 
+   public StaffController(StaffDao staffDao, PasswordEncoder passwordEncoder) {
         this.staffDao = staffDao;
+        this.passwordEncoder = passwordEncoder;
     }
-
    
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody StaffRegistrationRequest request) {
@@ -44,7 +45,7 @@ public class StaffController {
             username = baseUsername + attempt;
         }
 
-        String passwordHash = PasswordUtil.hashPassword(request.password());
+        String passwordHash = passwordEncoder.encode(request.password());
         long staffId = staffDao.registerStaff(request, passwordHash, staffNumber, username);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
@@ -74,3 +75,5 @@ public class StaffController {
         return "S-" + namePart + numberPart + "&" + titlePart;
     }
 }
+
+   
