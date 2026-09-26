@@ -85,4 +85,7 @@ public class AuthDao {
     public void recordLogout(long loginId) {
         recordLogoutCall.execute(new MapSqlParameterSource().addValue("p_login_id", loginId));
     }
+    public void updatePasswordHash(long userId, String newPasswordHash) {
+        jdbcTemplate.update("UPDATE users SET password_hash = ? WHERE user_id = ?", newPasswordHash, userId);
+    }
 }
