@@ -9,7 +9,7 @@ def get_connection():
     return mysql.connector.connect(
         host = "localhost",
         user = "root",
-       ## password = "",
+       password = "@Zingisa24",
         database = "syncpoint_archive"
     )
 
