@@ -1,7 +1,7 @@
 import streamlit as st
 from nav import nav_bar
 from datetime import datetime
-from db import register_patient
+from backend_api import register_patient
 
 nav_bar()
 
@@ -9,6 +9,24 @@ if "selected_role" not in st.session_state:
     st.session_state.selected_role = None
 
 st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
+
+def birth_date_form_id(id_number):
+    #Reading the YYYYMMDD on the SA ID number. 
+    #It will return a date or nothing/ None
+    #Picks the 2000s unless that would put the birth date in the future
+
+    mm = int(id_number[2:4])
+    dd = int(id_number [4:6])
+    yy = int(id_number[0:2])
+    today = date.today()
+    for year in (2000 + yy, 1900 + yy):
+        try:
+            candidate = date(year, mm, dd):
+        except ValueError:
+            continue
+        if candidate <= today:
+            return candidate
+    return None
 
 title = st.selectbox("Select your title:",
                      options= ["Mr.", "Mrs.", "Miss.", "Dr.", "Prof."]
@@ -29,33 +47,13 @@ if id_number:
     elif not id_number.isdigit():
         st.error("ID Number must only contain numbers.")
     else:
-
-        #Extracting DOB infor from the ID Number
-        mm = int(id_number[2:4])
-        dd = int(id_number [4:6])
-        yy = int(id_number[0:2])
-
-        #Determing the possible year
-        year_option_1 = 1900 + yy
-        year_option_2 = 2000 + yy
-
-        current_year = datetime.now().year
-        if year_option_2 < current_year:
-            selected_year = year_option_2
+        birth = birth_date_form_id(id_number)
+        if birth is None:
+            st.error("Invalid ID Number, the date of birth part (first 6 digits) is not a real date.")
         else:
-            selected_year = year_option_1
-
-        #Checking if the ID Number is correcting using ID Number 
-        if mm < 1 or mm > 12:
-            st.error("Invalid ID Number, Check the month section.")
-        elif dd < 1 or dd > 31:
-            st.error("Invalid ID Number, Check the date section.")
-        else:
-
-            #After giving the correct date of birth
-            birth_date = f"{selected_year}-{mm:02d}-{dd:02d}"
+            birth_date = birth.isoformat()
             birth_date_valid = True
-            st.text_input("Date of Birth", value= birth_date, disabled= True)
+            st.text_input("Date Of Birth", value= birth_date, disabled= True)
 
 st.write("**Address**")
 
@@ -126,6 +124,7 @@ required = [("First Name", first_name), ("Last Name", last_name),
             ("Mobile Phone", phone), ("Enter your email address", email),
             ("Enter yor Username", username), ("Enter your password", password)
             ]
+
 missing_field = []
 for field, value in required:
     if value is None or str(value).strip() == "":
@@ -147,7 +146,7 @@ if submit:
         with st.spinner("Creating your Account..."):
             success, result = register_patient(
                 username = username,
-                plain_password = password,
+                password = password,
                 title = title,
                 first_name = first_name,
                 middle_name = middle_name,
@@ -171,7 +170,11 @@ if submit:
                 membership_number = membership_num if medical_aid == "Yes" else None,
             )
         if success:
-            st.success("Account Created! Please log in.")
+            #st.success() vanish as soon the pages switch, so creating so that it shows to the login page
+            st.session_state.message = ("Account crreated. Your registration must be approved by Staff before you can log in.")
             st.switch_page("pages/1_Login.py")
         else:
-            st.error(result)
+            error = result.get("error", "Registration failed.")
+            st.error(error)
+            if error == "A database error occurred":
+                st.caption("That username or ID Number may already be registered.")
