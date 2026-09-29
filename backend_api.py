@@ -17,31 +17,49 @@ def reset_api_session():
     if old is not None:
         old.close()
 
-def _no_session_error(status_code):
-    return (
-        f"Not authorized (backend returned {status_code}). The login endpoint "
-        "doesn't set up a real Spring Security session yet, so role-gated "
-        "endpoints reject every request - flag this to the backend team."
-    )
+#Helpers
 
+def _clean(value):
+    if isinstance(value, str):
+        value = value.strip()
+        return value or None
+    return value
+
+def _error_message(status_code, data):
+    if isinstance(data, dict):
+        message = data.get("error")
+        fields = data.get("fields")
+        if message and isinstance(fields, dict) and fields:
+            details = "; ".join(f"{name}: {problem}" for name, problem in fields.items())
+            return f"{message} ({details})"
+
+        if message:
+            return message
+    if status_code in (401, 403):
+        return (
+            f"Not authorized (backend returned {status_code})."
+            "If you have just logged in, the backend login may not be creating a session yet."
+        )
+    return f"Request failed ({status_code})."
 
 def _request(method, path, **kwargs):
     try:
-        response = requests.request(method, f"{BASE_URL}{path}", timeout= TIMEOUT_SECONDS, **kwargs)
+        response = _session().request(
+            method, f"{BASE_URL}{path}", timeout= TIMEOUT_SECONDS, **kwargs
+        )
     except requests.exceptions.RequestException:
         return False, {"error": f"Could not reach the backend. Is it running on {BASE_URL}?"}
-    if response.status_code in (200, 201):
-        return True, response.json()
-    if  response.status_code == 204:
+    if response.status_code == 204:
         return True, {}
-    if response.status_code in (401, 403):
-        return False, {"error": _no_session_error(response.status_code)}
 
     try:
         data = response.json()
     except ValueError:
         data = {}
-    return False, {"error": data.get("error", f"Request failed ({response.status_code}).")}
+    if  response.status_code in (200, 201):
+        return True, data
+    
+    return False, {"error": _error_message(response.status_code, data)}
 
 #calls the POST/api/auth/login/admin
 
