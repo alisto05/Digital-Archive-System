@@ -63,6 +63,18 @@ def _request(method, path, **kwargs):
 
 #calls the POST/api/auth/login/admin
 
+#AUTH
+
+def login_patient(username: str, password: str):
+    #200 means {loginId, userId, patientId, displayName}
+    #401 means wrong credentials, 403 registration pending/ rejected
+    return _request("POST", "/api/auth/login/paatient", json= {"username": username, "password": password})
+
+def login_staff(username: str, password: str):
+    return _request("POST", "/api/auth/login/staff", json= {"username": username, "password": password})
+
+
+
 def login_admin(username: str, password: str):
     try:
         response = requests.post(
