@@ -123,6 +123,22 @@ def register_patient(
     }
     return _request("POST", "/api/patients/register", json= payload)
 
+#STAFF: patient approvals
+
+def get_pending_patients():
+    return _request("GET", "/api/approvals/pending-patients")
+
+def update_patient_status(patient_id, new_status: str, reviewed_by_staff_id):
+    return _request(
+        "PUT",
+        f"/api/approvals/patients/{patient_id}/status",
+        json= {"newStatus": new_status, "reviewedByStaffId": reviewed_by_staff_id},
+    )
+
+def get_recent_activity_for_patient(patient_id):
+    return _request("GET", f"/api/approvals/patients/{patient_id}/recent-activity")
+
+
 
 #Calls GET/api/documents/staff-search. Used for Admin "Documents Reports" tab
 
