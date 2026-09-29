@@ -35,7 +35,7 @@ public class UserSessionValidationFilter extends OncePerRequestFilter {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
-        // Requests without a logged-in user continue to normal security checks
+       
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || authentication instanceof AnonymousAuthenticationToken) {
@@ -64,7 +64,7 @@ public class UserSessionValidationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // Compare only role authorities with the user's current stored role
+    
     private boolean hasCurrentRole(
             Authentication authentication,
             String role) {
