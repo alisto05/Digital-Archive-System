@@ -1,7 +1,6 @@
 import streamlit as st
 from nav import nav_bar
-from db import get_patient_login_data, get_staff_login_data, verify_password
-from backend_api import login_admin
+from backend_api import login_patient, login_staff, login_admin
 
 nav_bar()
 
@@ -18,6 +17,11 @@ if "selected_role" not in st.session_state:
     st.session_state.selected_role = None
 
 st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
+
+message = st.session_state.pop("message", None)
+if message:
+    st.success(message)
+
 st.write("")
 st.divider()
 
@@ -41,46 +45,40 @@ with col3:
         st.session_state.selected_role = "Admin"
     st.caption("Admin Login Here")
 
+def finish_login(role, data):
+    #Keeps the same session for every role so other page can rely on them
+    st.session_state.logged_in_user = data["displayName"]
+    st.session_state.logged_in_role = role
+    st.session_state.user_id = data["userId"]
+    st.session_state.login_id = data["loginId"]
+    st.switch_page("pages/4_Dashboard.py")
+
 #If the Pateient was clicked, this how it would look like
 if st.session_state.selected_role == "Patient":
     username = st.text_input("Enter Your Patient Username")
     password = st.text_input("Enter Your Password", type= "password")
     
-    #DEMO
-    if st.button("Login"):
-        record = get_patient_login_data(username)
+    
+    if st.button("Login", key= "patient_login_button"):
+        success, data = login_patient(username, password)
 
-        if record is None:
-            st.error("Login Failed")
-        elif not verify_password(password, record["password_hash"]):
-            st.error("Login Failed")
-        elif record["status"] == "PENDING":
-            st.warning("Your registration is still awaiting Staff Approval.")
-        elif record["status"] == "REJECTED":
-            st.error("Your Registration was not approved. Contact SyncPoint support.")
-
+        if not success:
+            st.error(data.get("error", "Login Failed"))
         else:
-            st.session_state.logged_in_user = record["preferred_name"] or username
-            st.session_state.logged_in_role = "Patient"
-            st.session_state.patient_id = record["patient_id"]
-            st.switch_page("pages/4_Dashboard.py")
+            st.session_state.patient_id = data["patientId"]
+            finish_login("Patient", data)
             
 elif st.session_state.selected_role == "Staff":
     staff_username = st.text_input("Enter Your Staff Username")
-    staff_password = st.text_input("Enter Your Password", type= "password")
+    staff_password = st.text_input("Enter Your Password", type= "password", key= "staff_password")
 
-    if st.button("Login"):
-        record = get_staff_login_data(staff_username)
-
-        if record is None:
-            st.error("Login Failed")
-        elif not verify_password(staff_password, record["password_hash"]):
-            st.error("Login Failed")
+    if st.button("Login", key= "staff_login_button"):
+        success, data = login_staff(staff_username, staff_password)
+        if not success:
+            st.error(data.get("error", "Login Failed"))
         else:
-            st.session_state.logged_in_user = f"{record['first_name']} {record['last_name']}"
-            st.session_state.logged_in_role = "Staff"
-            st.session_state.staff_id = record["staff_id"]
-            st.switch_page("pages/4_Dashboard.py") 
+            st.session_state.staff_id = data["staffId"]
+            finish_login("Staff", data)
 
 elif st.session_state.selected_role == "Admin":
     admin_username = st.text_input("Enter Your Admin Username")
@@ -93,9 +91,5 @@ elif st.session_state.selected_role == "Admin":
         if not success:
             st.error(data.get("error", "Login Failed"))
         else:
-            st.session_state.logged_in_user = data["displayName"]
-            st.session_state.logged_in_role = "Admin"
             st.session_state.admin_id = data["adminId"]
-            st.session_state.user_id = data["userId"]
-            st.session_state.login_id = data["loginId"]
-            st.switch_page("pages/4_Dashboard.py")
+            finish_login("Admin", data)
