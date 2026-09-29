@@ -1,6 +1,6 @@
 import streamlit as st
 from nav import nav_bar
-from db import get_pending_patients, update_patient_status
+from backend_api import get_pending_patients, update_patient_status
 
 nav_bar()
 
@@ -12,7 +12,10 @@ if st.session_state.get("logged_in_role") != "Staff":
 
 st.title("Pending Patient Registrations")
 
-pending = get_pending_patients()
+ok, pending = get_pending_patients()
+if not ok:
+    st.error(pending.get("error", "Could not load pending registrations."))
+    st.stop()
 
 if not pending:
     st.info("No pending registrations right now.")
@@ -25,10 +28,17 @@ else:
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("Approve", key= f"approve_{patient['patient_id']}"):
-                    update_patient_status(patient["patient_id"], "APPROVED", st.session_state.staff_id)
-                    st.rerun()
+                    done, result = update_patient_status(patient["patient_id"], "APPROVED", st.session_state.staff_id)
+                    if done:
+                        st.rerun()
+                    else:
+                        st.error(result.get("error", "Could not approve this patient."))
 
             with col2:
-                if st.button("Reject", key= f"reject_{patient['patient_id']}"):
-                    update_patient_status(patient["patient_id"], "REJECTED", st.session_state.staff_id)
-                    st.rerun()
+                if st.button("Reject", key=f"reject_{patient['patient_id']}"):
+                    done, result = update_patient_status(patient["patient_id"], "REJECTED", st.session_state.staff_id)
+                    if done:
+                        st.rerun()
+                    else:
+                        st.error(result.get("error", "Could not reject this patient."))
+
