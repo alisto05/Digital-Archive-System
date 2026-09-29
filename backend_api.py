@@ -7,6 +7,16 @@ BASE_URL = os.environ.get("SYNCPOINT_API_URL", "http://localhost:8080")
 
 TIMEOUT_SECONDS = 5
 
+def _session():
+    if "api_session" not in st.session_state:
+        st.session_state["api_session"] = requests.Session()
+    return st.session_state["api_session"]
+
+def reset_api_session():
+    old = st.session_state.pop("api_session", None)
+    if old is not None:
+        old.close()
+
 def _no_session_error(status_code):
     return (
         f"Not authorized (backend returned {status_code}). The login endpoint "
