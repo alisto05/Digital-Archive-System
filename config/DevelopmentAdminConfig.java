@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Profile;
 @Profile("dev")
 public class DevelopmentAdminConfig {
 
-    // Create the initial administrator only in the development profile
+  
     @Bean
     public CommandLineRunner createDevelopmentAdmin(UserService userService) {
 
