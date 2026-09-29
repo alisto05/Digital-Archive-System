@@ -1,8 +1,7 @@
 import streamlit as st
 from nav import nav_bar
-from db import get_recent_activity_for_patient
 from backend_api import(get_pending_documents_for_staff, get_staff_dashboard_stats, get_documents_for_staff,
-                        review_document, get_patient_profile, get_patient_documents, get_document_requests_for_patient,)
+                        review_document, get_patient_profile, get_patient_documents, get_document_requests_for_patient, get_recent_activity_for_patient)
 
     
 if "selected_role" not in st.session_state:
@@ -123,11 +122,13 @@ if st.session_state.logged_in_role == "Patient":
 
     with tab4:
         st.subheader("Recent Activity")
-        activity = get_recent_activity_for_patient(st.session_state.patient_id)
-        if activity:
-            st.dataframe(activity)
-        else:
+        ok, activity = get_recent_activity_for_patient(st.session_state.patient_id)
+        if not ok:
+            st.error(activity.get("error", "Could not load your activity."))
+        elif not activity:
             st.info("No activity yet.")
+        else:
+            st.dataframe(activity)
 
 elif st.session_state.logged_in_role == "Staff":
     tab1, tab2, tab3 = st.tabs(["Overview", "Manage Patient Documents", "Reports"])
@@ -138,11 +139,11 @@ elif st.session_state.logged_in_role == "Staff":
         if not stats_ok:
             st.error(stats.get("error", "Could not load dashboard stats."))
         else:
-            st.metric("pending_approval", stats["pending_approvals"])
+            st.metric("Pending Approvals", stats["pending_approvals"])
 
     with tab2:
         st.subheader("Patient Documents")
-        search_term = st.text_input("Search by patient name, ID or Document type")
+        search_term = st.text_input("Search by patient name or Document type")
 
         docs_ok, pending_documents = get_pending_documents_for_staff()
 

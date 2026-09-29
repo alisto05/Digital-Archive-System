@@ -38,7 +38,7 @@ def _error_message(status_code, data):
     if status_code in (401, 403):
         return (
             f"Not authorized (backend returned {status_code})."
-            "If you have just logged in, the backend login may not be creating a session yet."
+            " If you have just logged in, the backend login may not be creating a session yet."
         )
     return f"Request failed ({status_code})."
 
@@ -68,7 +68,7 @@ def _request(method, path, **kwargs):
 def login_patient(username: str, password: str):
     #200 means {loginId, userId, patientId, displayName}
     #401 means wrong credentials, 403 registration pending/ rejected
-    return _request("POST", "/api/auth/login/paatient", json= {"username": username, "password": password})
+    return _request("POST", "/api/auth/login/patient", json= {"username": username, "password": password})
 
 def login_staff(username: str, password: str):
     return _request("POST", "/api/auth/login/staff", json= {"username": username, "password": password})
@@ -137,7 +137,6 @@ def update_patient_status(patient_id, new_status: str, reviewed_by_staff_id):
 
 def get_recent_activity_for_patient(patient_id):
     return _request("GET", f"/api/approvals/patients/{patient_id}/recent-activity")
-
 
 
 #Calls GET/api/documents/staff-search. Used for Admin "Documents Reports" tab

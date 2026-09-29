@@ -1,6 +1,6 @@
 import streamlit as st
 from nav import nav_bar
-from datetime import datetime
+from datetime import date
 from backend_api import register_patient
 
 nav_bar()
@@ -21,7 +21,7 @@ def birth_date_form_id(id_number):
     today = date.today()
     for year in (2000 + yy, 1900 + yy):
         try:
-            candidate = date(year, mm, dd):
+            candidate = date(year, mm, dd)
         except ValueError:
             continue
         if candidate <= today:
@@ -75,26 +75,26 @@ st.write("**Phone Numbers**")
 home = st.text_input("Home")
 if home:
     if len(home) != 10:
-        st.error("Home Number must be 10 digit.")
+        st.error("Home Number must be 10 digits.")
     elif not home.isdigit():
-        st.error("ID Number must only contain numbers.")
+        st.error("Home Number must only contain numbers.")
 work = st.text_input("Work")
 if work:
     if len(work) != 10:
-        st.error("Work Number must only 10 digit.")
+        st.error("Work Number must only be 10 digits.")
     elif not work.isdigit():
-        st.error("ID Number must only contain numbers.") 
+        st.error("Work Number must only contain numbers.") 
 
 phone = st.text_input("Mobile Phone")
 phone_2 = st.text_input("Secondary Phone")
 if phone:
     if len(phone) != 10:
-        st.error("Mobile Phone must only 10 digit.")
+        st.error("Mobile Phone must only be 10 digits.")
     elif not phone.isdigit():
         st.error("Mobile Phone must only contain numbers.") 
 if phone_2:
     if len(phone_2) !=10:
-        st.error("Secondary Phone must only be 10 digit.")
+        st.error("Secondary Phone must only be 10 digits.")
     elif not phone_2.isdigit():
         st.error("Secondary Phone must only contain numbers.")
 
@@ -130,12 +130,18 @@ for field, value in required:
     if value is None or str(value).strip() == "":
         missing_field.append(field)
 
+phone_fields = [("Home", home), ("Work", work), ("Mobile Phone", phone), ("Secondary Phone", phone_2)]
+bad_phone = [name for name, value in phone_fields
+             if value and (len(value) !=10 or not value.isdigit())]
+
 submit = st.button("Submit")
 if submit:
     if missing_field:
         st.error(f"Please fill in the following fields: {', '.join(missing_field)}")
     elif not birth_date_valid:
         st.error("Please enter a valid ID Number before submitting.")
+    elif bad_phone:
+        st.error(f"Please fix these phone numbers: {', '.join(bad_phone)}")
     elif len(password) <= 5:
         st.error("Password must be more than 5 characters")
     elif password != password_2:
@@ -171,7 +177,7 @@ if submit:
             )
         if success:
             #st.success() vanish as soon the pages switch, so creating so that it shows to the login page
-            st.session_state.message = ("Account crreated. Your registration must be approved by Staff before you can log in.")
+            st.session_state.message = ("Account created. Your registration must be approved by Staff before you can log in.")
             st.switch_page("pages/1_Login.py")
         else:
             error = result.get("error", "Registration failed.")
