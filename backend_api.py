@@ -76,37 +76,53 @@ def login_staff(username: str, password: str):
 
 
 def login_admin(username: str, password: str):
-    try:
-        response = requests.post(
-            f"{BASE_URL}/api/auth/login/admin",
-            json= {"username": username, "password": password},
-            timeout= TIMEOUT_SECONDS,
-        )
-    except requests.exceptions.RequestException:
-        return False, {"error": f"Could not reach the backend. Is it running on {BASE_URL}?"}
-
-    try:
-        data = response.json()
-    except ValueError:
-        data = {}
-
-    if response.status_code == 200:
-        return True, data
-
-    return False, {"error": data.get("error", "Login Failed")}
-
-#Calls POST/api/auth/logout, login endpoints never establish a real session either so this
-#call will also 401 until that's fixed.
+    return _request("POST", "/api/auth/login/admin", json= {"username": username, "password": password})
 
 def logout(login_id):
     try:
-        requests.post(
+        _session().post(
             f"{BASE_URL}/api/auth/logout",
             params={"loginId": login_id},
             timeout= TIMEOUT_SECONDS,
         )
     except requests.exceptions.RequestException:
         pass
+    reset_api_session()
+
+#PAITENT REGI
+
+def register_patient(
+        username, password, title, first_name, middle_name, last_name, preferred_name, id_number,
+        date_of_birth, country, address_line, city, postal_code, province, home_phone, work_phone,
+        mobile_phone, secondary_phone, email, secondary_email, has_medical_aid, provider, membership_number,
+):
+    payload = {
+        "username": _clean(username),
+        "password": password,
+        "title": _clean(title),
+        "firstName": _clean(first_name),
+        "middleName": _clean(middle_name),
+        "lastName": _clean(last_name),
+        "preferredName": _clean(preferred_name),
+        "idNumber": _clean(id_number),
+        "dateOfBirth": date_of_birth,
+        "country": _clean(country),
+        "addressLine": _clean(address_line),
+        "city": _clean(city),
+        "postalCode": _clean(postal_code),
+        "province": _clean(province),
+        "homePhone": _clean(home_phone),
+        "workPhone": _clean(work_phone),
+        "mobilePhone": _clean(mobile_phone),
+        "secondaryPhone": _clean(secondary_phone),
+        "email": _clean(email),
+        "secondaryEmail": _clean(secondary_email),
+        "hasMedicalAid": bool(has_medical_aid),
+        "provider": _clean(provider),
+        "membershipNumber": _clean(membership_number),
+    }
+    return _request("POST", "/api/patients/register", json= payload)
+
 
 #Calls GET/api/documents/staff-search. Used for Admin "Documents Reports" tab
 
