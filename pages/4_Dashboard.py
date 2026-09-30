@@ -210,33 +210,33 @@ elif st.session_state.logged_in_role == "Staff":
                 st.metric("Rejected Documents", stats["rejected_documents"])
 
 elif st.session_state.logged_in_role == "Admin":
-        tab1, tab2, tab3, tab4 = st.tabs(["Overview", "Manage Staff", "Document Reports", "Analytics"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Overview", "Manage Staff", "Document Reports", "Analytics"])
 
-        with tab1:
-            st.header(f"Welcome back, {st.session_state.logged_in_user}")
-            st.caption("More Overview stats will appear here.")
+    with tab1:
+        st.header(f"Welcome back, {st.session_state.logged_in_user}")
+        st.caption("More Overview stats will appear here.")
 
-        with tab2:
-            st.info(
+    with tab2:
+        st.info(
                 "Manage Staff (staff list + add staff) is coming soon"
-            )
+        )
 
-        with tab3:
-            st.subheader("Document Reports")
-            search_term = st.text_input("Search by patient name, ID, or doument type", key= "admin_doc_search")
-            success, documents = get_documents_for_staff(st.session_state.user_id, search_term)
+    with tab3:
+        st.subheader("Document Reports")
+        search_term = st.text_input("Search by patient name, ID, or doument type", key= "admin_doc_search")
+        success, documents = get_documents_for_staff(st.session_state.user_id, search_term)
 
-            if not success:
-                st.error(documents.get("error", "Could not load documents."))
-            elif not documents:
-                st.info("No documents found.")
-            else:
-                st.dataframe(documents)
+        if not success:
+            st.error(documents.get("error", "Could not load documents."))
+        elif not documents:
+            st.info("No documents found.")
+        else:
+            st.dataframe(documents)
 
-        with tab4:
-            st.info(
+    with tab4:
+        st.info(
                 "Analytical charts coming"
-            )
+        )
 
 if "confirm_signout" not in st.session_state:
     st.session_state.confirm_signout = False
