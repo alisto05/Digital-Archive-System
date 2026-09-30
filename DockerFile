@@ -25,4 +25,7 @@ WORKDIR /app
 #so exactly one file matches
 COPY --from=build /build/target/*.jar app.jar
 
-
+USER app
+ENV STORAGE_DIR=/app/storage
+EXPOSE 8080
+ENTRYPOINT [ "java", "-XX:MaxRAMPercentage=75", "-jar", "/app/app.jar" ]
