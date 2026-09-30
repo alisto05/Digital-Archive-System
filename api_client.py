@@ -34,3 +34,9 @@ def logout(self):
         self.post("/api/auth/logout")
     finally:
         self.reset()
+
+def reset(self):
+    self.http.cookies.clear()
+    self._csrf = None
+    self.user = None
+    
