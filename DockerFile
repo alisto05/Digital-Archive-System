@@ -22,7 +22,6 @@ WORKDIR /app
 
 #pom has no <finalName>, so the jar is syncpoint-archive-backend-<version>.jar
 #The wildcard survives version bumps; Boots's repackage renames the plain jar to -.jar.original,
-#so exactly one file matches
 COPY --from=build /build/target/*.jar app.jar
 
 USER app
