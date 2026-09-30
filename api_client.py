@@ -29,3 +29,8 @@ def login(self, role, username, password):
     self._csrf = None
     return self.user
 
+def logout(self):
+    try:
+        self.post("/api/auth/logout")
+    finally:
+        self.reset()
