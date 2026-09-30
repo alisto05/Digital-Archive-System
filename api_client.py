@@ -39,4 +39,29 @@ def reset(self):
     self.http.cookies.clear()
     self._csrf = None
     self.user = None
+
+# =========== verbs ======================
+def get(self, path, **kw):
+    return self.request("GET", path, **kw)
+
+def post(self, path, **kw):
+    return self.request("POST", path, **kw)
+
+def put(self, path, **kw):
+    return self.request("PUT", path, **kw)
+
+#Sends the request for file uploads
+def request(self, method, path, *, _retry = True, **kw):
+    method = method.upper()
+    changes_data = method not in ("GET", "HEAD", "OPTIONS")
+    headers = dict(kw.pop("headers", {}) or {})
+    if self.client_ip:
+        headers["X-Forwarded-For"] = self.client_ip
+    if changes_data:
+        if self._csrf is None:
+            self._csrf is None:
+            self._fetch_csrf()
+        headers[self._csrf[0]] = self._csrf[1]
+
+    resp = self.http.request(method, self.base_url + path, headers = headers, timeout = self.timeout, **kw)
     
