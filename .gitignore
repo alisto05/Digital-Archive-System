@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+#Uploaded patient PDFs
+storage/
+**/storage/
+
+#Python
+__pycache__/
+*.pyc
+.venv/
+venv/
