@@ -1,7 +1,7 @@
-package com.hospitalarchive.hospitalarchivebackend.config;
+package com.syncpoint.archive.config;
 
-import com.hospitalarchive.hospitalarchivebackend.model.User;
-import com.hospitalarchive.hospitalarchivebackend.repository.UserRepository;
+import com.syncpoint.archive.dao.AuthDao;
+import com.syncpoint.archive.security.JsonErrors;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,13 +16,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+
 
 public class UserSessionValidationFilter extends OncePerRequestFilter {
 
-    private final UserRepository userRepository;
+    private static final Set<String> KNOWN_ROLES = Set.of("PATIENT", "STAFF", "ADMIN");
 
-    public UserSessionValidationFilter(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    private final AuthDao authDao;
+
+    public UserSessionValidationFilter(AuthDao authDao) {
+        this.authDao = authDao;
     }
 
     @Override
@@ -32,58 +36,39 @@ public class UserSessionValidationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-       
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || authentication instanceof AnonymousAuthenticationToken) {
-
             filterChain.doFilter(request, response);
             return;
         }
 
-        User user = userRepository.findByUsername(authentication.getName())
-                .orElse(null);
+        String currentRole = authDao.findUserRole(authentication.getName()).orElse(null);
 
-        if (user == null || !hasCurrentRole(authentication, user.getRole())) {
-
+        if (currentRole == null || !hasCurrentRole(authentication, currentRole)) {
             SecurityContextHolder.clearContext();
-
             HttpSession session = request.getSession(false);
-
             if (session != null) {
                 session.invalidate();
             }
-
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            JsonErrors.write(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "Your session is no longer valid. Please log in again.");
             return;
         }
 
         filterChain.doFilter(request, response);
     }
 
-    
-    private boolean hasCurrentRole(
-            Authentication authentication,
-            String role) {
-
-        if (role == null
-                || (!role.equals("ADMIN")
-                && !role.equals("ARCHIVE_STAFF")
-                && !role.equals("READ_ONLY"))) {
+    private boolean hasCurrentRole(Authentication authentication, String role) {
+        if (!KNOWN_ROLES.contains(role)) {
             return false;
         }
-
-        String expectedAuthority = "ROLE_" + role;
-
         List<String> sessionRoles = authentication.getAuthorities().stream()
-                .map(authority -> authority.getAuthority())
-                .filter(authority -> authority.startsWith("ROLE_"))
+                .map(a -> a.getAuthority())
+                .filter(a -> a.startsWith("ROLE_"))
                 .toList();
-
-        return sessionRoles.size() == 1
-                && sessionRoles.contains(expectedAuthority);
+        return sessionRoles.size() == 1 && sessionRoles.contains("ROLE_" + role);
     }
 }
