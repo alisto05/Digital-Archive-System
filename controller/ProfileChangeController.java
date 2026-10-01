@@ -19,10 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Patients ask for a detail on their profile to change; staff approve or reject.
- * Approval applies the change through sp_resolve_change_request.
- */
+
 @RestController
 @RequestMapping("/api/profile-change-requests")
 public class ProfileChangeController {
@@ -35,8 +32,7 @@ public class ProfileChangeController {
         this.patientDao = patientDao;
     }
 
-    /** A patient files a request for themselves. The old value is read from the database, not the client. */
-    @PostMapping
+   
     public ResponseEntity<Map<String, Object>> submit(@Valid @RequestBody ProfileChangeRequestDto request,
                                                       @AuthenticationPrincipal AppUserDetails me) {
         if (me.patientId() == null) {
@@ -74,7 +70,7 @@ public class ProfileChangeController {
         return ResponseEntity.ok(profileChangeDao.getPending());
     }
 
-    /** The reviewer is the logged-in staff member; only PENDING requests can be resolved. */
+    
     @PutMapping("/{changeRequestId}/resolve")
     public ResponseEntity<Void> resolve(@PathVariable long changeRequestId,
                                         @Valid @RequestBody ProfileChangeResolveRequest request,
