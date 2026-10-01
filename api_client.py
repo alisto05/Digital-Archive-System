@@ -64,7 +64,7 @@ class ApiClient:
             
         resp = self.http.request(method, self.base_url + path, headers = headers, timeout = self.timeout, **kw)
 
-    #When the token went on stale like session expired and recreated it fetches a new one and retry once
+    #When the token went stale like session expired and recreated it fetches a new one and retry once
 
         if changes_data and _retry and resp.status_code == 403 and "CSRF" in resp.text:
             self._csrf = None

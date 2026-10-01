@@ -2,7 +2,7 @@ import requests
 import streamlit as st
 from api_client import ApiClient, ApiError
 
-def _Browser_ip():
+def _browser_ip():
     try:
         return st.context.ip_address
     except Exception:
@@ -11,7 +11,7 @@ def _Browser_ip():
 #One ApiClient per browser session
 def get_api() -> ApiClient:
     if "api" not in st.session_state:
-        st.session_state["api"] = ApiClient(client_ip= _Browser_ip())
+        st.session_state["api"] = ApiClient(client_ip= _browser_ip())
     return st.session_state["api"]
 
 #Stops the page unless someone is logged in
@@ -25,7 +25,7 @@ def require_role(*roles) -> ApiClient:
         st.stop()
     return api
 
-#Runs the API call and turns failure into on screen messages using the backend's own erroe text
+#Runs the API call and turns failure into on screen messages using the backend's own error text
 def call(fn, *args, stop = True, **kwargs):
     api = get_api()
     try:
