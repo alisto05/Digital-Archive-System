@@ -29,10 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Session login for the three account types. Every attempt is written through
- * sp_record_login_attempt; logout is recorded by SecurityConfig's logout handler.
- */
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -42,7 +39,7 @@ public class AuthController {
     private final SecurityContextRepository securityContextRepository;
     private final SessionAuthenticationStrategy sessionAuthenticationStrategy;
 
-    // Checked when the username is unknown so both cases take about the same time
+   
     private final String dummyHash;
 
     public AuthController(AuthDao authDao,
@@ -56,7 +53,7 @@ public class AuthController {
         this.dummyHash = passwordEncoder.encode("not-a-real-password");
     }
 
-    // Supply a CSRF token for requests that change data
+  
     @GetMapping("/csrf")
     public Map<String, String> getCsrfToken(CsrfToken csrfToken) {
         return Map.of(
@@ -117,7 +114,7 @@ public class AuthController {
             return error(HttpStatus.UNAUTHORIZED, "Invalid username or password.");
         }
 
-        // Patients can only log in once staff have approved their registration
+      
         if (AppUserDetails.PATIENT.equals(role)) {
             String status = (String) record.get("status");
             if ("PENDING".equals(status)) {
@@ -157,7 +154,7 @@ public class AuthController {
         return ResponseEntity.ok(body);
     }
 
-    /** Verifies BCrypt or the legacy salt$sha256 hash; a legacy match is re-hashed to BCrypt right away. */
+    
     private boolean checkPasswordAndMigrate(String rawPassword, String storedHash, long userId) {
         boolean matches = passwordEncoder.matches(rawPassword, storedHash);
         if (matches && !PasswordConfig.isBCryptHash(storedHash)) {
