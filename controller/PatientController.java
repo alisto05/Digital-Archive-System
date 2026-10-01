@@ -36,11 +36,7 @@ public class PatientController {
         this.searchAndStatsDao = searchAndStatsDao;
     }
 
-    /**
-     * Staff find a patient by name or ID number, e.g. to upload for them or request a document,
-     * even when the patient has no documents yet. Approved patients only. The search is recorded
-     * through sp_record_search against the logged-in staff member.
-     */
+  
     @GetMapping("/search")
     public ResponseEntity<List<Map<String, Object>>> search(@RequestParam("search") String search,
                                                             @AuthenticationPrincipal AppUserDetails me) {
@@ -50,7 +46,7 @@ public class PatientController {
         return ResponseEntity.ok(results);
     }
 
-    /** Public self-registration. The patient starts as PENDING and cannot log in until staff approve. */
+    
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody PatientRegistrationRequest request) {
         PasswordPolicy.validate(request.password());
