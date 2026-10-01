@@ -31,7 +31,7 @@ public class ApprovalController {
         return ResponseEntity.ok(approvalDao.getPendingPatients());
     }
 
-    /** The reviewing staff member is the logged-in user; only PENDING patients can be reviewed. */
+   
     @PutMapping("/patients/{patientId}/status")
     public ResponseEntity<Void> updatePatientStatus(@PathVariable long patientId,
                                                     @Valid @RequestBody PatientStatusUpdateRequest request,
