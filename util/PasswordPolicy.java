@@ -2,7 +2,7 @@ package com.syncpoint.archive.util;
 
 import java.nio.charset.StandardCharsets;
 
-/** BCrypt only uses the first 72 bytes, so longer passwords are rejected rather than silently truncated. */
+
 public final class PasswordPolicy {
 
     public static final int MAX_BYTES = 72;
@@ -14,7 +14,7 @@ public final class PasswordPolicy {
         return password != null && password.getBytes(StandardCharsets.UTF_8).length <= MAX_BYTES;
     }
 
-    /** @throws IllegalArgumentException with a client-safe message */
+   
     public static void validate(String password) {
         if (password == null || password.isBlank()) {
             throw new IllegalArgumentException("Password is required.");
