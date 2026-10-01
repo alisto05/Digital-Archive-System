@@ -7,12 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * The logged-in user, stored in the session. Controllers read WHO is acting from
- * here (never from the request body): userId for "uploaded by" / "reviewed by",
- * patientId for ownership checks, staffId for patient approvals, loginId so the
- * logout can be recorded against the right login row.
- */
+
 public record AppUserDetails(
         long userId,
         String username,
@@ -37,7 +32,7 @@ public record AppUserDetails(
         return List.of(new SimpleGrantedAuthority("ROLE_" + role));
     }
 
-    // Credentials are never kept in the session
+    
     @Override
     public String getPassword() {
         return null;
