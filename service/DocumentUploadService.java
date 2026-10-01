@@ -8,11 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-/**
- * Validates and stores the PDF, then records it through sp_upload_document.
- * The server decides storage_key, mime_type, file_size_bytes and checksum_sha256;
- * nothing about where or how the file is stored comes from the client.
- */
+
 @Service
 public class DocumentUploadService {
 
@@ -29,7 +25,7 @@ public class DocumentUploadService {
     public long upload(MultipartFile file, long patientId, int documentTypeId, long uploadedByUserId)
             throws IOException {
 
-        // Validates size, extension and the %PDF- header, then writes the file
+        
         FileStorageService.StoredFile stored = fileStorageService.storePdf(file);
 
         try {
@@ -44,7 +40,7 @@ public class DocumentUploadService {
                     stored.checksumSha256()
             ));
         } catch (RuntimeException exception) {
-            // Don't leave an orphaned PDF behind when the database insert fails
+           
             try {
                 fileStorageService.deleteStoredFile(stored.storageKey());
             } catch (IOException | RuntimeException cleanupException) {
@@ -54,7 +50,7 @@ public class DocumentUploadService {
         }
     }
 
-    // original_filename is for display only: drop any path, control characters and excess length
+   
     static String displayName(String clientFilename) {
         String name = clientFilename == null ? "" : clientFilename;
         name = name.substring(Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\')) + 1);
