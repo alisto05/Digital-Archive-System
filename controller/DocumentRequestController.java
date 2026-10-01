@@ -25,7 +25,7 @@ public class DocumentRequestController {
         this.documentRequestDao = documentRequestDao;
     }
 
-    /** Staff request a document from a patient. The requester is the logged-in staff member. */
+   
     @PostMapping
     public ResponseEntity<Map<String, Object>> requestDocument(@Valid @RequestBody DocumentRequestDto request,
                                                                @AuthenticationPrincipal AppUserDetails me) {
@@ -34,7 +34,7 @@ public class DocumentRequestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("requestId", requestId));
     }
 
-    /** A patient sees the requests made to them; staff can see any patient's. */
+   
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<Map<String, Object>>> getForPatient(@PathVariable long patientId,
                                                                    @AuthenticationPrincipal AppUserDetails me) {
