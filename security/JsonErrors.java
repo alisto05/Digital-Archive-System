@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-/** Writes {"error": "..."} for errors raised inside the security filter chain. */
+
 public final class JsonErrors {
 
     private JsonErrors() {
