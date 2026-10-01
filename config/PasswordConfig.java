@@ -3,31 +3,58 @@ package com.syncpoint.archive.config;
 import com.syncpoint.archive.util.PasswordUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.regex.Pattern;
+
 
 @Configuration
 public class PasswordConfig {
 
+    private static final Pattern BCRYPT = Pattern.compile("^\\$2[aby]?\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
+
+    public static boolean isBCryptHash(String hash) {
+        return hash != null && BCRYPT.matcher(hash).matches();
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-         BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence rawPassword) {
-                return bcrypt.encode(rawPassword);
-            }
-
-            @Override
-            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                 if (isBCryptHash(encodedPassword)) {
-                    return bcrypt.matches(rawPassword, encodedPassword);
-                }
-                return PasswordUtil.verifyPassword(rawPassword.toString(), encodedPassword);
-            }
-        };
+        return new MigratingPasswordEncoder(new BCryptPasswordEncoder());
     }
-     public static boolean isBCryptHash(String hash) {
-        return hash != null && (hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$"));
+
+    static class MigratingPasswordEncoder implements PasswordEncoder {
+
+        private final PasswordEncoder bcrypt;
+
+        MigratingPasswordEncoder(PasswordEncoder bcrypt) {
+            this.bcrypt = bcrypt;
+        }
+
+        @Override
+        public String encode(CharSequence rawPassword) {
+            return bcrypt.encode(rawPassword);
+        }
+
+        @Override
+        public boolean matches(CharSequence rawPassword, String storedHash) {
+            if (rawPassword == null || storedHash == null || storedHash.isBlank()) {
+                return false;
+            }
+            if (isBCryptHash(storedHash)) {
+                return bcrypt.matches(rawPassword, storedHash);
+            }
+            return matchesLegacy(rawPassword, storedHash);
+        }
+
+        @Override
+        public boolean upgradeEncoding(String storedHash) {
+            return !isBCryptHash(storedHash);
+        }
+
+        
+        private boolean matchesLegacy(CharSequence rawPassword, String storedHash) {
+            return PasswordUtil.verifyLegacyPassword(rawPassword.toString(), storedHash);
+        }
     }
 }
