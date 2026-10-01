@@ -18,7 +18,7 @@ import java.util.Map;
 @RequestMapping("/api/staff")
 public class StaffController {
 
-    // Canonical job titles (stored capitalised, e.g. "Doctor") and the digit used in staff numbers
+  
     private static final Map<String, String> CANONICAL_TITLES = Map.of(
             "doctor", "Doctor", "nurse", "Nurse", "receptionist", "Receptionist");
     private static final Map<String, String> JOB_ROLE_DIGITS = Map.of(
@@ -32,7 +32,7 @@ public class StaffController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    /** Admin creates a staff account. The server generates the staff number and username. */
+   
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody StaffRegistrationRequest request) {
         PasswordPolicy.validate(request.password());
@@ -63,11 +63,11 @@ public class StaffController {
                 canonicalTitle, request.courtesyTitle(), request.department(),
                 email, request.specialization());
 
-        // A concurrent duplicate (username / staff number) surfaces as 409 from the exception handler
+      
         long staffId = staffDao.registerStaff(
                 canonical, passwordEncoder.encode(request.password()), staffNumber, username);
 
-        // The password is never returned; hand it to the new staff member out of band.
+      
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "staffId", staffId,
                 "username", username,
