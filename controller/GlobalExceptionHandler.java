@@ -25,18 +25,13 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Every error leaves the API as {"error": "..."}. Duplicates are 409.
- * Extends ResponseEntityExceptionHandler so Spring's own errors (bad JSON, missing
- * parameters, oversized uploads, 404, 405...) use the same shape.
- */
+
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // ---------- Spring MVC errors (including ResponseStatusException) ----------
-
+    
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
@@ -73,7 +68,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(payload);
     }
 
-    // ---------- Our own validation ----------
+    
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleBadRequest(IllegalArgumentException ex) {
@@ -85,7 +80,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    // ---------- Database errors ----------
+    
 
     @ExceptionHandler(DuplicateKeyException.class)
     public ResponseEntity<Map<String, String>> handleDuplicate(DuplicateKeyException ex) {
@@ -103,7 +98,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.NOT_FOUND, "Record not found.");
     }
 
-    // A stored procedure that rejects the request with SIGNAL SQLSTATE '45000' carries its own message
+    
     @ExceptionHandler(UncategorizedSQLException.class)
     public ResponseEntity<Map<String, String>> handleProcedureError(UncategorizedSQLException ex) {
         SQLException sql = ex.getSQLException();
@@ -122,7 +117,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "A database error occurred.");
     }
 
-    // ---------- Everything else ----------
+    
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<Map<String, String>> handleIo(IOException ex) {
