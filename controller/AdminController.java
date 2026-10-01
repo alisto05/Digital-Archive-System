@@ -15,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 
-/** Everything here requires the ADMIN role (see SecurityConfig). */
+
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
