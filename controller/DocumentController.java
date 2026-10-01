@@ -52,10 +52,7 @@ public class DocumentController {
         return ResponseEntity.ok(documentDao.getDocumentTypes());
     }
 
-    /**
-     * Multipart upload of one PDF. "Uploaded by" is the logged-in user. Patients always upload for
-     * themselves; staff must say which patient. Storage details are decided by the server.
-     */
+  
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> upload(
             @RequestParam("file") MultipartFile file,
@@ -100,7 +97,7 @@ public class DocumentController {
         return ResponseEntity.ok(documentDao.getPendingDocumentsForStaff());
     }
 
-    /** The reviewer is the logged-in user. Only PENDING documents can be reviewed; a rejection needs a reason. */
+   
     @PutMapping("/{documentId}/review")
     public ResponseEntity<Void> review(@PathVariable long documentId,
                                        @Valid @RequestBody DocumentReviewRequest request,
@@ -122,7 +119,7 @@ public class DocumentController {
         return ResponseEntity.noContent().build();
     }
 
-    /** Download a PDF: the owning patient or any staff member. */
+    
     @GetMapping("/{documentId}/download")
     public ResponseEntity<Resource> download(@PathVariable long documentId,
                                              @AuthenticationPrincipal AppUserDetails me) throws IOException {
