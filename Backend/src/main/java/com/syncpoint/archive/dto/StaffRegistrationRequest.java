@@ -15,3 +15,4 @@ public record StaffRegistrationRequest(
         @Email @Size(max = 255) String email,
         @Size(max = 150) String specialization
 ) {}
+
