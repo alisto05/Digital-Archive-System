@@ -19,11 +19,11 @@ services:
       start_period: 30s
 
   backend:
-    build: ./backend
+    build: ./Backend
     restart: unless-stopped
     depends_on:
-    db:
-      condition: service_healthy
+      db:
+        condition: service_healthy
     environment:
       DB_URL: "jdbc:mysql://db:3306/syncpoint_archive?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       DB_USER: ${DB_USER}
