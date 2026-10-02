@@ -44,3 +44,14 @@ services:
       timeout: 5s
       retries: 10
       start_period: 40s
+
+  frontend:
+    build: ./Frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      SYNCPOINT_API_URL: http://backend:8080
+    ports:
+      - "8501:8501"
