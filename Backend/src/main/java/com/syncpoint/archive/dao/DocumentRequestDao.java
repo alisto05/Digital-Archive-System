@@ -1,6 +1,5 @@
 package com.syncpoint.archive.dao;
 
-import com.syncpoint.archive.dto.DocumentRequestDto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -33,17 +32,18 @@ public class DocumentRequestDao {
                 );
     }
 
-    public long requestDocument(DocumentRequestDto r) {
+    public long requestDocument(long patientId, long requestedByUserId,
+                                int documentTypeId, String requestReason) {
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("p_patient_id", r.patientId())
-                .addValue("p_requested_by_user_id", r.requestedByUserId())
-                .addValue("p_document_type_id", r.documentTypeId())
-                .addValue("p_request_reason", r.requestReason());
+                .addValue("p_patient_id", patientId)
+                .addValue("p_requested_by_user_id", requestedByUserId)
+                .addValue("p_document_type_id", documentTypeId)
+                .addValue("p_request_reason", requestReason);
         Map<String, Object> out = requestDocumentCall.execute(params);
         return ((Number) out.get("out_request_id")).longValue();
     }
 
-  
+    /** Powers the "Requested Documents" table on the patient Dashboard. */
     public List<Map<String, Object>> getDocumentRequestsForPatient(long patientId) {
         return jdbcTemplate.queryForList("""
                 SELECT dr.request_id, dt.type_name, dr.request_reason, dr.status, dr.requested_at
