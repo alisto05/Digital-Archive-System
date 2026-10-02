@@ -14,8 +14,21 @@ def _session():
 
 def reset_api_session():
     old = st.session_state.pop("api_session", None)
+    st.session_state.pop("csrf", None)
     if old is not None:
         old.close()
+
+#The backend requires a CSRF token on every POST/ PUT/ DELETE
+def _csrf_headers(refresh= False):
+    if refresh:
+        st.session_state.pop("csrf", None)
+    if "csrf" not in st.session_state:
+        response = _session().get(f"{BASE_URL}/api/auth/csrf", timeout= TIMEOUT_SECONDS)
+        response.raise_for_status()
+        data = response.json()
+        st.session_state["csrf"] = (data["headerName"], data["token"])
+    header_name, token = st.session_state["csrf"]
+    return {header_name: token}
 
 #Helpers
 
@@ -43,12 +56,26 @@ def _error_message(status_code, data):
     return f"Request failed ({status_code})."
 
 def _request(method, path, **kwargs):
+    changes_data = method.upper() in ("POST", "PUT", "PATCH", "DELETE")
+    base_headers = dict(kwargs.pop("headers", None) or {})
     try:
-        response = _session().request(
-            method, f"{BASE_URL}{path}", timeout= TIMEOUT_SECONDS, **kwargs
-        )
-    except requests.exceptions.RequestException:
+        for attempt in (1, 2):
+            headers = dict(base_headers)
+            if changes_data:
+                headers.update(_csrf_headers(refresh = attempt == 2))
+            response = _session().request(
+                method, f"{BASE_URL}{path}", timeout= TIMEOUT_SECONDS, headers= headers, **kwargs
+            )
+            #A rejected token is fetched again once
+            if not (changes_data and response.status_code == 403 and "CSRF" in response.text):
+                break
+        
+    except (requests.exceptions.RequestException, KeyError, ValueError):
         return False, {"error": f"Could not reach the backend. Is it running on {BASE_URL}?"}
+    
+    #The backend rotates the token on login so that it is fetched again next time
+    if path.startswith("/api/auth/login"):
+        st.session_state.pop("csrf", None)
     if response.status_code == 204:
         return True, {}
 
@@ -78,11 +105,11 @@ def login_staff(username: str, password: str):
 def login_admin(username: str, password: str):
     return _request("POST", "/api/auth/login/admin", json= {"username": username, "password": password})
 
-def logout(login_id):
+def logout():
     try:
         _session().post(
             f"{BASE_URL}/api/auth/logout",
-            params={"loginId": login_id},
+            headers= _csrf_headers(),
             timeout= TIMEOUT_SECONDS,
         )
     except requests.exceptions.RequestException:
@@ -128,11 +155,11 @@ def register_patient(
 def get_pending_patients():
     return _request("GET", "/api/approvals/pending-patients")
 
-def update_patient_status(patient_id, new_status: str, reviewed_by_staff_id):
+def update_patient_status(patient_id, new_status: str):
     return _request(
         "PUT",
         f"/api/approvals/patients/{patient_id}/status",
-        json= {"newStatus": new_status, "reviewedByStaffId": reviewed_by_staff_id},
+        json= {"newStatus": new_status},
     )
 
 def get_recent_activity_for_patient(patient_id):
@@ -141,8 +168,8 @@ def get_recent_activity_for_patient(patient_id):
 
 #Calls GET/api/documents/staff-search. Used for Admin "Documents Reports" tab
 
-def get_documents_for_staff(searching_user_id, search_term: str | None = None):
-    params = {"searchingUserId": searching_user_id}
+def get_documents_for_staff(search_term: str | None = None):
+    params = {}
     if search_term:
         params["search"] = search_term
     return _request("GET", "/api/documents/staff-search", params= params)
@@ -176,12 +203,11 @@ def get_document_requests_for_patient(patient_id):
     return _request("GET", f"/api/document-requests/patient/{patient_id}")
 
 #"Approved/Rejected" Rejected True on success
-def review_document(document_id, new_status: str, reviewed_by_user_id, rejection_reason: str | None = None):
+def review_document(document_id, new_status: str, rejection_reason: str | None = None):
     return _request(
         "PUT",
         f"/api/documents/{document_id}/review",
         json= {
-            "reviewedByUserId": reviewed_by_user_id,
             "newStatus": new_status,
             "rejectionReason": rejection_reason,
         },
