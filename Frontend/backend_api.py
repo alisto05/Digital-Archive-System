@@ -225,6 +225,7 @@ def get_all_staff():
 def get_all_patients():
     return _request("GET", "/api/admin/patients")
 
+#The backend generates the username and staff number and returns them
 def register_staff(password, first_name, last_name, job_title, courtesy_title, department, email, specialization):
     payload = {
         "password": password,
@@ -237,3 +238,12 @@ def register_staff(password, first_name, last_name, job_title, courtesy_title, d
         "specialization": _clean(specialization),
     }
     return _request("POST", "/api/staff/register", json= payload)
+
+def register_admin(username, password, first_name, last_name):
+    payload = {
+        "username": _clean(username),
+        "password": password,
+        "firstName": _clean(first_name),
+        "lastName": _clean(last_name),
+    }
+    return _request("POST", "/api/admin/register", json= payload)
