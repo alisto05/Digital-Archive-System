@@ -4,7 +4,7 @@ WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1 \
 STREAMLIT_BROWSER_GATHER_USAGE_STATS=false \
-APP_ENTRY=app.py
+APP_ENTRY=home.py
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
