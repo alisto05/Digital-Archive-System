@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import requests
+from typing import Any
 
 #Override with an environment variable if the backend isn't on localhost.
 BASE_URL = os.environ.get("SYNCPOINT_API_URL", "http://localhost:8080")
@@ -55,7 +56,7 @@ def _error_message(status_code, data):
         )
     return f"Request failed ({status_code})."
 
-def _request(method, path, **kwargs):
+def _request(method, path, **kwargs) -> tuple[bool, Any]:
     changes_data = method.upper() in ("POST", "PUT", "PATCH", "DELETE")
     base_headers = dict(kwargs.pop("headers", None) or {})
     try:

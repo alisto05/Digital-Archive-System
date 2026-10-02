@@ -60,6 +60,7 @@ class ApiClient:
         if changes_data:
             if self._csrf is None:
                 self._fetch_csrf()
+            assert self._csrf is not None
             headers[self._csrf[0]] = self._csrf[1]
             
         resp = self.http.request(method, self.base_url + path, headers = headers, timeout = self.timeout, **kw)

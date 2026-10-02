@@ -7,7 +7,7 @@ nav_bar()
 if "logged_in_role" not in st.session_state:
     st.session_state.logged_in_role = None
 
-#This send the Patient or the Staff directly to their dashboard,
+#This send the Patient or the Staff directly to their dashboard, z
 #if they logged in successful
 if st.session_state.logged_in_role:
     st.switch_page("pages/4_Dashboard.py")
