@@ -175,19 +175,23 @@ elif st.session_state.logged_in_role == "Staff":
                     st.write(d["original_filename"])
                 with col4:
                     if st.button("Approve", key= f"approve_{d['document_id']}"):
-                        ok, result = review_document(d["document_id"], "APPROVED", st.session_state.user_id)
+                        ok, result = review_document(d["document_id"], "APPROVED")
                         if ok:
                             st.rerun()
                         else:
                             st.error(result.get("error", "Could not approve document."))
 
                 with col5:
+                    reason = st.text_input("Reason", key= f"reason_{d['document_id']}", label_visibility= "collapsed", placeholder= "Rejection reason")
                     if st.button("Reject", key= f"reject_{d['document_id']}"):
-                        ok, result = review_document(d["document_id"], "REJECTED", st.session_state.user_id)
-                        if ok:
-                            st.rerun()
+                        if not reason.strip():
+                            st.error("Please enter a rejection reason.")
                         else:
-                            st.error(result.get("error", "Could not reject document."))
+                            ok, result = review_document(d["document_id"], "REJECTED", reason.strip())
+                            if ok:
+                                st.rerun()
+                            else:
+                                st.error(result.get("error", "Could not reject document."))
 
     with tab3:
         st.subheader("Reports")
@@ -224,7 +228,7 @@ elif st.session_state.logged_in_role == "Admin":
     with tab3:
         st.subheader("Document Reports")
         search_term = st.text_input("Search by patient name, ID, or doument type", key= "admin_doc_search")
-        success, documents = get_documents_for_staff(st.session_state.user_id, search_term)
+        success, documents = get_documents_for_staff(search_term)
 
         if not success:
             st.error(documents.get("error", "Could not load documents."))

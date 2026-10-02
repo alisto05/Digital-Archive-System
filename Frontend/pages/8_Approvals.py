@@ -28,7 +28,7 @@ else:
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("Approve", key= f"approve_{patient['patient_id']}"):
-                    done, result = update_patient_status(patient["patient_id"], "APPROVED", st.session_state.staff_id)
+                    done, result = update_patient_status(patient["patient_id"], "APPROVED")
                     if done:
                         st.rerun()
                     else:
@@ -36,7 +36,7 @@ else:
 
             with col2:
                 if st.button("Reject", key=f"reject_{patient['patient_id']}"):
-                    done, result = update_patient_status(patient["patient_id"], "REJECTED", st.session_state.staff_id)
+                    done, result = update_patient_status(patient["patient_id"], "REJECTED")
                     if done:
                         st.rerun()
                     else:
