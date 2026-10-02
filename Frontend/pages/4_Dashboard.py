@@ -296,7 +296,53 @@ elif st.session_state.logged_in_role == "Admin":
                     st.error(result.get("error", "Could not add the staff Member."))
 
         st.divider()
-        
+
+        #Adding a new admin
+
+        st.subheader("Add an Admin")
+        admin_created = st.session_state.pop("admin_created", None)
+        if admin_created:
+            st.success(f"Admin created. They can log in now as the admin with username: {admin_created}")
+
+        with st.form("add_admin_form", clear_on_submit= True):
+            col1, col2 = st.columns(2)
+
+            with col1:
+                admin_first = st.text_input("First Name*", key= "admin_first")
+                admin_username = st.text_input("Username*", key= "admin_username")
+                admin_password = st.text_input("Password*", type= "password", key= "admin_password")
+
+            with col2:
+                admin_last = st.text_input("Last Name*", key= "admin_last")
+                st.caption("Choose the username yourself. It must not be 'admin' and must not already be taken.")
+                admin_confirm = st.text_input("Confirm password*", type= "password", key= "admin_confirm")
+
+            admin_submitted = st.form_submit_button("Add Admin")
+
+        if admin_submitted:
+            if not admin_first.strip() or not admin_last.strip() or not admin_username.strip() or not admin_password:
+                st.error("First name, last name, username and password are all required.")
+            elif admin_username.strip().lower() == "admin":
+                st.error("Please choose a username other than 'admin'.")
+            elif admin_password != admin_confirm:
+                st.error("The two passwords do not match.")
+            else:
+                ok, result = register_admin(admin_username, admin_password, admin_first, admin_last)
+                if ok:
+                    st.session_state.admin_created = admin_username.strip()
+                    st.rerun()
+                else:
+                    st.error(result.get("error", "Could not add the admin."))
+
+        st.divider()
+        st.subheader("Staff Members")
+        ok, staff_list = get_all_staff()
+        if not ok:
+            st.error(staff_list.get("error", "Could not load staff."))
+        elif not staff_list:
+            st.info("No Staff Members yet.")
+        else:
+            st.dataframe(staff_list)
             
     with tab3:
         st.subheader("Document Reports")
