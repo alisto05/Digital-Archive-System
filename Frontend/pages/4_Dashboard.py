@@ -1,7 +1,8 @@
 import streamlit as st
 from nav import nav_bar
 from backend_api import(get_pending_documents_for_staff, get_staff_dashboard_stats, get_documents_for_staff,
-                        review_document, get_patient_profile, get_patient_documents, get_document_requests_for_patient, get_recent_activity_for_patient)
+                        review_document, get_patient_profile, get_patient_documents, get_document_requests_for_patient, 
+                        get_recent_activity_for_patient, get_admin_overview, get_all_staff, get_all_patients, register_staff, register_admin)
 
     
 if "selected_role" not in st.session_state:
@@ -218,7 +219,38 @@ elif st.session_state.logged_in_role == "Admin":
 
     with tab1:
         st.header(f"Welcome back, {st.session_state.logged_in_user}")
-        st.caption("More Overview stats will appear here.")
+        ok, overview = get_admin_overview()
+        if not ok:
+            st.error(overview.get("error", "Could not load the overview."))
+        else:
+            col1, col2, col3, col4 = st.columns(4)
+
+            with col1:
+                st.metric("Patients", overview["total_patients"])
+            with col2:
+                st.metric("Staff", overview["total_staff"])
+            with col3:
+                st.metric("Admins", overview["total_admins"])
+            with col4:
+                st.metric("Documents", overview["total_documents"])
+
+            col5, col6 = st.columns(2)
+
+            with col5:
+                st.metric("Pending patient Registrations", overview["pending_patients"])
+            with col6:
+                st.metric("Documents waiting for review", overview["pending_documents"])
+
+        st.divider()
+        st.subheader("All patients")
+        ok, patients = get_all_patients()
+
+        if not ok:
+            st.error(patients.get("error", "Could not load patients."))
+        elif not patients:
+            st.info("No patients have registered yet.")
+        else:
+            st.dataframe(patients)
 
     with tab2:
         st.info(
