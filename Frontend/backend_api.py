@@ -213,3 +213,12 @@ def review_document(document_id, new_status: str, rejection_reason: str | None =
             "rejectionReason": rejection_reason,
         },
     )
+
+def get_admin_overview():
+    return _request("GET", "/api/admin/overview")
+
+def get_all_staff():
+    return _request("GET", "/api/admin/staff")
+
+def get_all_patients():
+    return _request("GET", "/api/admin/patients")
