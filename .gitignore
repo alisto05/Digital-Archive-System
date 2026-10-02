@@ -12,3 +12,12 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+
+#Java/ Maven 
+target/
+
+#IDE 
+.idea/
+*.iml
+.vscode/
