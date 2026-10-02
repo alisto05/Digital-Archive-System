@@ -1,3 +1,14 @@
 [MASTER]
 #letting pylint find nav.py and backend_api.py
 init-hook= 'import sys; sys.path.append("Frontend")'
+
+[MESSAGES CONTROL]
+#Style checks that don't suit streamlit page scripts
+disable=
+missing-module-docstring,
+missing-function-docstring,
+invalid-name,
+trailing-whitespace,
+line-too-long,
+missing-final-newline,
+redefined-outer-name
