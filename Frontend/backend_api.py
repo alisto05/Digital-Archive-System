@@ -214,6 +214,8 @@ def review_document(document_id, new_status: str, rejection_reason: str | None =
         },
     )
 
+#=======ADMIN calls GET documents overview, patients, staff=========
+
 def get_admin_overview():
     return _request("GET", "/api/admin/overview")
 
@@ -222,3 +224,16 @@ def get_all_staff():
 
 def get_all_patients():
     return _request("GET", "/api/admin/patients")
+
+def register_staff(password, first_name, last_name, job_title, courtesy_title, department, email, specialization):
+    payload = {
+        "password": password,
+        "firstName": _clean(first_name),
+        "lastName": _clean(last_name),
+        "jobTitle": job_title,
+        "courtesyTitle": _clean(courtesy_title),
+        "department": _clean(department),
+        "email": _clean(email),
+        "specialization": _clean(specialization),
+    }
+    return _request("POST", "/api/staff/register", json= payload)
