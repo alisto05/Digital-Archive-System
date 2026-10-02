@@ -357,9 +357,42 @@ elif st.session_state.logged_in_role == "Admin":
             st.dataframe(documents)
 
     with tab4:
-        st.info(
-                "Analytical charts coming"
-        )
+        st.subheader("Analytics")
+        ok, overview = get_admin_overview()
+        if not ok:
+            st.error(overview.get("error", "Could not load analytics."))
+        else:
+            #Only real numbers from the backend
+            chart_left, chart_right = st.columns(2)
+
+            with chart_left:
+                st.write("**Patients by status**")
+                st.bar_chart({
+                    "Status": ["Pending", "Approved", "Rejected"],
+                    "Patients": [
+                        overview["pending_patients"],
+                        overview["approved_patients"],
+                        overview["rejected_patients"],
+                    ],
+                }, x= "Status", y= "Patients")
+
+            with chart_right:
+                st.write("**Documents by status**")
+
+#total_documents/ pending_documents come from overview. Approved and rejected come from the dashboard stats
+                stats_ok, stats = get_staff_dashboard_stats()
+                if not stats_ok:
+                    st.error(stats.get("error", "Could not load documents stats."))
+                else:
+                    st.bar_chart({
+                        "Status": ["Pending", "Approved", "Rejected"],
+                        "Documents": [
+                            stats["pending_approvals"],
+                            stats["approved_documents"],
+                            stats["rejected_documents"],
+                        ],
+                    }, x= "Status", y= "Documents")
+
 
 if "confirm_signout" not in st.session_state:
     st.session_state.confirm_signout = False
