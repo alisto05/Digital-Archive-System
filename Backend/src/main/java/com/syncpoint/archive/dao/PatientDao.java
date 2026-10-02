@@ -7,10 +7,13 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Types;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class PatientDao {
@@ -51,6 +54,9 @@ public class PatientDao {
                 );
     }
 
+    /** New patients always start in status = PENDING (the table default) — matches
+     * the approval workflow db.py/pages/8_Approvals.py already implement. */
+    @Transactional
     public long registerPatient(PatientRegistrationRequest r, String passwordHash) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("p_username", r.username())
@@ -81,9 +87,9 @@ public class PatientDao {
         return ((Number) out.get("out_patient_id")).longValue();
     }
 
-   
-    public Map<String, Object> getPatientProfile(long patientId) {
-        return jdbcTemplate.queryForMap("""
+    /** Powers the "My Profile" tab — joins current address/contact/medical-aid rows. */
+    public Optional<Map<String, Object>> getPatientProfile(long patientId) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT p.title, p.first_name, p.middle_name, p.last_name, p.preferred_name,
                        p.id_number, p.date_of_birth,
                        a.address_line, a.city, a.province, a.postal_code, a.country,
@@ -96,5 +102,18 @@ public class PatientDao {
                 LEFT JOIN patient_medical_aid m ON m.patient_id = p.patient_id
                 WHERE p.patient_id = ?
                 """, patientId);
+        return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
+    }
+
+    public boolean usernameExists(String username) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM users WHERE username = ?", Integer.class, username);
+        return count != null && count > 0;
+    }
+
+    public boolean idNumberExists(String idNumber) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM patients WHERE id_number = ?", Integer.class, idNumber);
+        return count != null && count > 0;
     }
 }
