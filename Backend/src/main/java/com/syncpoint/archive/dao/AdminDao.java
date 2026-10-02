@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Types;
@@ -32,6 +33,7 @@ public class AdminDao {
                 );
     }
 
+    @Transactional
     public long registerAdmin(AdminRegistrationRequest r, String passwordHash) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("p_username", r.username())
@@ -47,7 +49,12 @@ public class AdminDao {
                 "SELECT COUNT(*) FROM users WHERE username = ?", Integer.class, username);
         return count != null && count > 0;
     }
- public Map<String, Object> getOverviewStats() {
+
+    /** Overview counts for an Admin dashboard: patients by status, staff
+     * count, and document counts by status (documents/staff tables live
+     * in this same database, so plain queries cover it — no new procedure
+     * needed for read-only aggregation like this). */
+    public Map<String, Object> getOverviewStats() {
         return jdbcTemplate.queryForMap("""
                 SELECT
                     (SELECT COUNT(*) FROM patients) AS total_patients,
@@ -64,7 +71,7 @@ public class AdminDao {
     public java.util.List<Map<String, Object>> getAllStaff() {
         return jdbcTemplate.queryForList("""
                 SELECT staff_id, first_name, last_name, staff_number, job_title,
-                       courtesy_title, department, created_at
+                       courtesy_title, department, email, specialization, created_at
                 FROM staff
                 ORDER BY created_at DESC
                 """);
@@ -79,4 +86,3 @@ public class AdminDao {
                 """);
     }
 }
-

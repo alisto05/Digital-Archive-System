@@ -7,11 +7,13 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class DocumentDao {
@@ -63,7 +65,7 @@ public class DocumentDao {
         return ((Number) out.get("out_document_id")).longValue();
     }
 
-   
+    /** Powers the "My Documents" tab, with optional filename/type search. */
     public List<Map<String, Object>> getDocumentsForPatient(long patientId, String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
             return jdbcTemplate.queryForList("""
@@ -86,7 +88,7 @@ public class DocumentDao {
                 """, patientId, like, like);
     }
 
-   
+    /** Powers the staff Search page — by patient name, ID number, or document type. */
     public List<Map<String, Object>> searchDocumentsForStaff(String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
             return jdbcTemplate.queryForList("""
@@ -122,17 +124,42 @@ public class DocumentDao {
                 """);
     }
 
-    public void reviewDocument(long documentId, String newStatus, long reviewedByUserId, String rejectionReason) {
-        MapSqlParameterSource params = new MapSqlParameterSource()
+    /**
+     * Reviews a document through sp_review_document, but only while it is PENDING.
+     * The row is locked first so two reviewers cannot both decide the same document.
+     */
+    @Transactional
+    public ReviewResult reviewIfPending(long documentId, String newStatus,
+                                        long reviewedByUserId, String rejectionReason) {
+        List<String> status = jdbcTemplate.queryForList(
+                "SELECT status FROM documents WHERE document_id = ? FOR UPDATE", String.class, documentId);
+        if (status.isEmpty()) {
+            return ReviewResult.NOT_FOUND;
+        }
+        if (!"PENDING".equals(status.get(0))) {
+            return ReviewResult.NOT_PENDING;
+        }
+
+        reviewDocumentCall.execute(new MapSqlParameterSource()
                 .addValue("p_document_id", documentId)
                 .addValue("p_new_status", newStatus)
                 .addValue("p_reviewed_by_user_id", reviewedByUserId)
-                .addValue("p_rejection_reason", rejectionReason);
-        reviewDocumentCall.execute(params);
+                .addValue("p_rejection_reason", rejectionReason));
+        return ReviewResult.REVIEWED;
     }
 
     public List<Map<String, Object>> getDocumentTypes() {
         return jdbcTemplate.queryForList(
                 "SELECT document_type_id, type_name FROM document_types ORDER BY type_name");
+    }
+
+    /** Internal lookup used for download authorisation and review checks. */
+    public Optional<Map<String, Object>> findDocument(long documentId) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT document_id, patient_id, original_filename, storage_key, mime_type, status
+                FROM documents
+                WHERE document_id = ?
+                """, documentId);
+        return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
     }
 }

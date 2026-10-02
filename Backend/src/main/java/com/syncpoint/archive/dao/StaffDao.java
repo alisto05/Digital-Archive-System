@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Types;
@@ -31,11 +32,21 @@ public class StaffDao {
                         new SqlParameter("p_staff_number", Types.VARCHAR),
                         new SqlParameter("p_job_title", Types.VARCHAR),
                         new SqlParameter("p_department", Types.VARCHAR),
+                        new SqlParameter("p_email", Types.VARCHAR),
+                        new SqlParameter("p_specialization", Types.VARCHAR),
                         new SqlOutParameter("out_staff_id", Types.BIGINT)
                 );
     }
 
-  
+    /** courtesy_title isn't part of sp_register_staff's signature (it wasn't in
+     * the original procedure), so it's set with a follow-up UPDATE — same
+     * approach staff.py already uses.
+     *
+     * username is passed explicitly (not read from r.username()) because
+     * StaffController generates the real username server-side — whatever the
+     * client sent in the request body is just a placeholder to satisfy
+     * validation and must never be what actually gets stored. */
+    @Transactional
     public long registerStaff(StaffRegistrationRequest r, String passwordHash,
                                String staffNumber, String username) {
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -45,7 +56,9 @@ public class StaffDao {
                 .addValue("p_last_name", r.lastName())
                 .addValue("p_staff_number", staffNumber)
                 .addValue("p_job_title", r.jobTitle())
-                .addValue("p_department", r.department());
+                .addValue("p_department", r.department())
+                .addValue("p_email", blankToNull(r.email()))
+                .addValue("p_specialization", blankToNull(r.specialization()));
 
         Map<String, Object> out = registerStaffCall.execute(params);
         long staffId = ((Number) out.get("out_staff_id")).longValue();
@@ -67,5 +80,16 @@ public class StaffDao {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM users WHERE username = ?", Integer.class, username);
         return count != null && count > 0;
+    }
+
+    public boolean emailExists(String email) {
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM staff WHERE email = ?", Integer.class, email);
+        return count != null && count > 0;
+    }
+
+    // staff.email is UNIQUE, so an empty string must be stored as NULL
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

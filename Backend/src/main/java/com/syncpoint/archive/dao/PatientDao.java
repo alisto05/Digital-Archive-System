@@ -105,6 +105,26 @@ public class PatientDao {
         return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
     }
 
+    /**
+     * Staff lookup by name or ID number. Only APPROVED patients (the ones documents can be
+     * uploaded for or requested from), at most 25 rows, so it cannot be used to dump the table.
+     */
+    public List<Map<String, Object>> searchApprovedPatients(String term) {
+        String like = com.syncpoint.archive.util.SearchTerms.likeContains(term);
+        return jdbcTemplate.queryForList("""
+                SELECT patient_id, first_name, last_name, preferred_name, id_number, date_of_birth
+                FROM patients
+                WHERE status = 'APPROVED'
+                  AND (first_name LIKE ? ESCAPE '!'
+                       OR last_name LIKE ? ESCAPE '!'
+                       OR preferred_name LIKE ? ESCAPE '!'
+                       OR CONCAT(first_name, ' ', last_name) LIKE ? ESCAPE '!'
+                       OR id_number LIKE ? ESCAPE '!')
+                ORDER BY last_name, first_name
+                LIMIT 25
+                """, like, like, like, like, like);
+    }
+
     public boolean usernameExists(String username) {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM users WHERE username = ?", Integer.class, username);
