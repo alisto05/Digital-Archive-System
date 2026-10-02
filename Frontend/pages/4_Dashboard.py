@@ -262,7 +262,7 @@ elif st.session_state.logged_in_role == "Admin":
                 "Give the username and the password you set to the staff member."
             )
 
-        with st.form("add_staff_form", clear_on_submit= True):
+        with st.form("add_staff_form", clear_on_submit= False, enter_to_submit= False):
             col1, col2 = st.columns(2)
 
             with col1:
@@ -304,7 +304,7 @@ elif st.session_state.logged_in_role == "Admin":
         if admin_created:
             st.success(f"Admin created. They can log in now as the admin with username: {admin_created}")
 
-        with st.form("add_admin_form", clear_on_submit= True):
+        with st.form("add_admin_form", clear_on_submit= False, enter_to_submit= False):
             col1, col2 = st.columns(2)
 
             with col1:
