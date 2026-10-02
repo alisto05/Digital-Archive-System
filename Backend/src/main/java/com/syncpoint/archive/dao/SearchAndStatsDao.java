@@ -15,14 +15,16 @@ public class SearchAndStatsDao {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-   
+    /** Calls sp_record_search — fires the DOCUMENT_SEARCH audit trigger. */
     public void recordSearch(long userId, String searchTerm, String searchScope, int resultsCount) {
+        // search_history.search_term is VARCHAR(255)
+        String term = searchTerm.length() > 255 ? searchTerm.substring(0, 255) : searchTerm;
         jdbcTemplate.update(
                 "CALL sp_record_search(?, ?, ?, ?)",
-                userId, searchTerm, searchScope, resultsCount);
+                userId, term, searchScope, resultsCount);
     }
 
-    
+    /** Replaces the hardcoded st.metric("Total Documents", "24") placeholders. */
     public Map<String, Object> getStaffDashboardStats() {
         return jdbcTemplate.queryForMap("""
                 SELECT
