@@ -199,7 +199,7 @@ elif st.session_state.logged_in_role == "Staff":
             if not documents_to_show:
                 st.info("No pending documents right now.")
 
-#Staff must open the the document before they can approve/ reject it
+#---------Staff must open the the document before they can approve/ reject it----------------
             for d in documents_to_show:
                 doc_id = d["document_id"]
                 doc_key = f"doc_bytes_{doc_id}"
@@ -267,7 +267,7 @@ elif st.session_state.logged_in_role == "Staff":
                     st.write(f"**{patient['first_name']} {patient['last_name']}**")
                     st.caption(f"ID Number: {patient['id_number']} | Registered: {patient['created_at']}")
 
-#------The profile is only fetched when the toggle is on so that the page does not call the backend for every patient on every click---
+#------The profile is only fetched when the toggle is on so that the page does not call the backend for every patient on every click-----
 
                     if st.toggle("Show registration details", key= f"reg_details_{pid}"):
                         profile_ok, profile = get_patient_profile(pid)
@@ -321,6 +321,8 @@ elif st.session_state.logged_in_role == "Staff":
                 st.metric("Approved Documents", stats["approved_documents"])
             with col5:
                 st.metric("Rejected Documents", stats["rejected_documents"])
+
+#--------------------------PDF export for STAFF---------------------------------------------------------------------------
 
             summary_rows = [
                 {"Metric": "Total Documents", "Value": stats["total_documents"]},
