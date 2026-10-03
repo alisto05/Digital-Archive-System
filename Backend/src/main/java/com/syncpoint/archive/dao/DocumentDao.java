@@ -65,6 +65,7 @@ public class DocumentDao {
         return ((Number) out.get("out_document_id")).longValue();
     }
 
+   
     public List<Map<String, Object>> getDocumentsForPatient(long patientId, String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
             return jdbcTemplate.queryForList("""
@@ -156,7 +157,7 @@ public class DocumentDao {
                 "SELECT document_type_id, type_name FROM document_types ORDER BY type_name");
     }
 
-    
+   
     public Optional<Map<String, Object>> findDocument(long documentId) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT document_id, patient_id, original_filename, storage_key, mime_type, status
