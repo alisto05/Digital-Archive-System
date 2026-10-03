@@ -267,6 +267,8 @@ elif st.session_state.logged_in_role == "Staff":
                     st.write(f"**{patient['first_name']} {patient['last_name']}**")
                     st.caption(f"ID Number: {patient['id_number']} | Registered: {patient['created_at']}")
 
+#------The profile is only fetched when the toggle is on so that the page does not call the backend for every patient on every click---
+
                     if st.toggle("Show registration details", key= f"reg_details_{pid}"):
                         profile_ok, profile = get_patient_profile(pid)
 
@@ -300,6 +302,8 @@ elif st.session_state.logged_in_role == "Staff":
                             else:
                                 st.error(result.get("error", "Could not reject this patient."))
 
+    with tab4:
+        st.subheader("Reports")
         stats_ok, stats = get_staff_dashboard_stats()
         if not stats_ok:
             st.error(stats.get("error", "Could not load report stats."))
@@ -317,6 +321,18 @@ elif st.session_state.logged_in_role == "Staff":
                 st.metric("Approved Documents", stats["approved_documents"])
             with col5:
                 st.metric("Rejected Documents", stats["rejected_documents"])
+
+            summary_rows = [
+                {"Metric": "Total Documents", "Value": stats["total_documents"]},
+                {"Metric": "Pending Approvals", "Value": stats["pending_approvals"]},
+                {"Metric": "Approved Documents", "Value": stats["approved_documents"]},
+                {"Metric": "Rejected Documents", "Value": stats["rejected_documents"]},
+                {"Metric": "Pending Patient Registrations", "Value": stats["pending_patient_registrations"]},
+            ]
+            st.download_button(
+                "Download summary as PDF", data= make_pdf("Staff Summary Report", summary_rows),
+                file_name= "staff_summary.pdf", mime= "application/pdf", key= "staff_summary_pdf"
+            )
 
 elif st.session_state.logged_in_role == "Admin":
     tab1, tab2, tab3, tab4 = st.tabs(["Overview", "Manage Staff", "Document Reports", "Analytics"])
