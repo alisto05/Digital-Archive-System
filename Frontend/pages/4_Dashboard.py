@@ -489,6 +489,14 @@ elif st.session_state.logged_in_role == "Admin":
             st.info("No documents found.")
         else:
             st.dataframe(documents)
+            st.download_button(
+                "Download Report as PDF",
+                data= make_pdf("Document Report", documents,
+                               ["first_name", "last_name", "id_number", "type_name",
+                                "original_filename", "status", "uploaded_at"
+                                ]),
+                file_name= "document_report.pdf", mime= "application/pdf", key= "admin_in_documents_pdf"
+            )
 
     with tab4:
         st.subheader("Analytics")
