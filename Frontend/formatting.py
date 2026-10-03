@@ -31,6 +31,12 @@ def fmt_datetime(value) -> str:
     if _ALREADY_FORMATTED.fullmatch(str(value).strip()):
         return str(value).strip()
     parsed = _parse(value)
+    return parsed.strftime(DATE_FORMAT) if parsed else str(value)
+
+def fmt_date(value) -> str:
+    if value in (None, ""):
+        return "-"
+    parsed = _parse(value)
     return parsed.strftime(DATE_FORMAT) if parsed else str(value)[:10]
 
 def _is_date_column(key: str) -> bool:
