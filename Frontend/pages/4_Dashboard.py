@@ -2,7 +2,9 @@ import streamlit as st
 from nav import nav_bar
 from backend_api import(get_pending_documents_for_staff, get_staff_dashboard_stats, get_documents_for_staff,
                         review_document, get_patient_profile, get_patient_documents, get_document_requests_for_patient, 
-                        get_recent_activity_for_patient, get_admin_overview, get_all_staff, get_all_patients, register_staff, register_admin)
+                        get_recent_activity_for_patient, get_admin_overview, get_all_staff, get_all_patients,
+                        register_staff, register_admin, get_pending_patients, update_patient_status, download_document, 
+                        get_document_types, upload_document)
 
     
 if "selected_role" not in st.session_state:

@@ -216,7 +216,7 @@ def review_document(document_id, new_status: str, rejection_reason: str | None =
     )
 
 #Staff must be able to open a document before approving/ rejecting
-def download(document_id) -> tuple[bool, Any]:
+def download_document(document_id) -> tuple[bool, Any]:
     try:
         response = _session().get(
             f"{BASE_URL}/api/documents/{document_id}/download", timeout = 30
