@@ -233,7 +233,18 @@ def download(document_id) -> tuple[bool, Any]:
         data = {}
     return False, {"error": _error_message(response.status_code, data)}
 
+#Patient Upload
+def get_document_types():
+    return _request("GET", "/api/documents/types")
 
+def upload_document(file_bytes: bytes, filename: str, document_type_id: int):
+    return _request(
+        "POST",
+        "/api/documents/upload",
+        files= {"files": (filename, file_bytes, "application/pdf")},
+        data= {"documentTypeId": str(document_type_id)},
+        timeout = 60,
+    )
 
 #=======ADMIN calls GET documents overview, patients, staff=========
 
