@@ -2,5 +2,6 @@
     "python.REPL.enableREPLSmartSend": false,
     "pylint.args": [
         "--rcfile=${workspaceFolder}/.pylintrc"
-    ]
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:system"
 }
