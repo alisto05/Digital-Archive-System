@@ -374,7 +374,7 @@ elif st.session_state.logged_in_role == "Admin":
         else:
             st.dataframe(patients)
             st.download_button(
-                "Download ppatients as PDF", data= make_pdf("All Patients", patients),
+                "Download patients as PDF", data= make_pdf("All Patients", patients),
                 file_name= "all_patients.pdf", mime= "application/pdf", key= "admin_patients_pdf"
             )
 
