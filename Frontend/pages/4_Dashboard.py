@@ -5,6 +5,7 @@ from backend_api import(get_pending_documents_for_staff, get_staff_dashboard_sta
                         get_recent_activity_for_patient, get_admin_overview, get_all_staff, get_all_patients,
                         register_staff, register_admin, get_pending_patients, update_patient_status, download_document, 
                         get_document_types, upload_document)
+from pdf_export import make_pdf
 
     
 if "selected_role" not in st.session_state:
@@ -12,6 +13,9 @@ if "selected_role" not in st.session_state:
 
 if "logged_in_role" not in st.session_state:
     st.session_state.logged_in_role = None
+
+if "upload_counter" not in st.session_state:
+    st.session_state.upload_counter = 0
 
 nav_bar()
 
@@ -105,7 +109,7 @@ if st.session_state.logged_in_role == "Patient":
         elif not documents:
             st.info("You haven't uploaded any documents yet.")
         else:
-            st.dataframe([
+            my_document_rows = [
                 {
                     "Document Type": d["type_name"],
                     "File": d["original_filename"],
@@ -114,14 +118,42 @@ if st.session_state.logged_in_role == "Patient":
                     "Rejection Reason": d.get("rejection_reason") or "-"
                 }
                 for d in documents
-            ])
+            ]
+            st.dataframe(my_document_rows)
+            st.download_button(
+                "Download as PDF", data= make_pdf("My Documents", my_document_rows),
+                file_name= "my_document.pdf", mime= "application/pdf", key= "my_documents_pdf"
+            )
 
         st.divider()
         st.subheader("Upload a document")
-        st.file_uploader(
-            "Upload here", type= ["pdf"], disabled= True,
-            help= "Coming soon"
-        )
+        upload_message = st.session_state.pop("upload_success", None)
+        if upload_message:
+            st.success(upload_message)
+
+        types_ok, document_types = get_document_types()
+        if not types_ok:
+            st.error(document_types.get("error", "Could not load the document types."))
+        elif not document_types:
+            st.info("No document types are set up yet.")
+        else:
+            types_ids = {t["type_name"]: t["document_type_id"] for t in document_types}
+            chosen_type = st.selectbox("Document type", list(types_ids.keys()))
+            pdf_file = st.file_uploader(
+                "Upload here (PDF only, max 10MB)", type= ["pdf"],
+                key= f"patient_upload_{st.session_state.upload_counter}"
+            )
+            if st.button("Submit document", key= "submit_document"):
+                if pdf_file is None:
+                    st.error("Please choose a PDF file first.")
+                else:
+                    ok, result = upload_document(pdf_file.getvalue(), pdf_file.name, types_ids[chosen_type])
+                    if ok:
+                        st.session_state.upload_success = f"'{pdf_file.name}' was uploaded and is waiting for staff review."
+                        st.session_state.upload_counter += 1
+                        st.rerun()
+                    else:
+                        st.error(result.get("error", "Could not upload the document."))
 
     with tab4:
         st.subheader("Recent Activity")
