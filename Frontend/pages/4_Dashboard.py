@@ -166,7 +166,7 @@ if st.session_state.logged_in_role == "Patient":
             st.dataframe(activity)
 
 elif st.session_state.logged_in_role == "Staff":
-    tab1, tab2, tab3 = st.tabs(["Overview", "Manage Patient Documents", "Reports"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Overview", "Manage Patient Documents", "Patient Registrations", "Reports"])
 
     with tab1:
         st.header(f"Welcome back, {st.session_state.logged_in_user}")
@@ -199,34 +199,58 @@ elif st.session_state.logged_in_role == "Staff":
             if not documents_to_show:
                 st.info("No pending documents right now.")
 
+#Staff must open the the document before they can approve/ reject it
             for d in documents_to_show:
-                col1, col2, col3, col4, col5 = st.columns(5)
+                doc_id = d["document_id"]
+                doc_key = f"doc_bytes_{doc_id}"
+                opened = doc_key in st.session_state
 
-                with col1:
-                    st.write(f"{d['first_name']} {d['last_name']}")
-                with col2:
-                    st.write(d["type_name"])
-                with col3:
-                    st.write(d["original_filename"])
-                with col4:
-                    if st.button("Approve", key= f"approve_{d['document_id']}"):
-                        ok, result = review_document(d["document_id"], "APPROVED")
-                        if ok:
-                            st.rerun()
-                        else:
-                            st.error(result.get("error", "Could not approve document."))
+                with st.container(border= True):
+                    st.write(f"**{d['first_name']} {d['last_name']}** - {d['type_name']}")
+                    st.caption(f"{d['original_filename']} | uploaded {d['uploaded_at']}")
 
-                with col5:
-                    reason = st.text_input("Reason", key= f"reason_{d['document_id']}", label_visibility= "collapsed", placeholder= "Rejection reason")
-                    if st.button("Reject", key= f"reject_{d['document_id']}"):
-                        if not reason.strip():
-                            st.error("Please enter a rejection reason.")
-                        else:
-                            ok, result = review_document(d["document_id"], "REJECTED", reason.strip())
+                    if not opened:
+                        if st.button("Open Document", key= f"open_{doc_id}"):
+                            ok, result = download_document(doc_id)
                             if ok:
+                                st.session_state[doc_key] = result
                                 st.rerun()
                             else:
-                                st.error(result.get("error", "Could not reject document."))
+                                st.error(result.get("error", "Could not open the document."))
+                        st.caption("Open the document first. Approve and Reject unlock afterwards.")
+                    else:
+                        st.download_button(
+                            "Download PDF to view it", data = st.session_state[doc_key],
+                            file_name= d["original_filename"], mime= "application/pdf",
+                            key = f"download_{doc_id}"
+                        )
+                    reason = st.text_input(
+                        "Rejection reason", key= f"reason_{doc_id}",
+                        placeholder= "Rejection reason (needed to reject)", disabled= not opened
+                    )
+
+                    col_approve, col_reject = st.columns(2)
+
+                    with col_approve:
+                        if st.button("Approve", key = f"approve_{doc_id}", disabled= not opened):
+                            ok, result = review_document(doc_id, "APPROVED")
+                            if ok:
+                                st.session_state.pop(doc_key, None)
+                                st.rerun()
+                            else:
+                                st.error(result.get("error", "Could not approve document."))
+
+                    with col_reject:
+                        if st.button("Reject", key= f"reject_{doc_id}", disabled= not opened):
+                            if not reason.strip():
+                                st.error("Please enter a rejection reason.")
+                            else:
+                                ok, result = review_document(doc_id, "REJECTED", reason.strip())
+                                if ok:
+                                    st.session_state.pop(doc_key, None)
+                                    st.rerun()
+                                else:
+                                    st.error(result.get("error", "Could not reject document."))
 
     with tab3:
         st.subheader("Reports")
