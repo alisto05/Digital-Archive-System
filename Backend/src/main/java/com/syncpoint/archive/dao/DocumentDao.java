@@ -65,7 +65,6 @@ public class DocumentDao {
         return ((Number) out.get("out_document_id")).longValue();
     }
 
-    /** Powers the "My Documents" tab, with optional filename/type search. */
     public List<Map<String, Object>> getDocumentsForPatient(long patientId, String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
             return jdbcTemplate.queryForList("""
@@ -88,25 +87,32 @@ public class DocumentDao {
                 """, patientId, like, like);
     }
 
-    /** Powers the staff Search page — by patient name, ID number, or document type. */
+   
+    private static final String STAFF_SEARCH_SELECT = """
+            SELECT d.document_id, p.patient_id, p.first_name, p.last_name, p.id_number,
+                   dt.type_name, d.original_filename, d.status, d.uploaded_at,
+                   d.approved_by_user_id AS reviewed_by_user_id,
+                   COALESCE(NULLIF(CONCAT_WS(' ', s.first_name, s.last_name), ''),
+                            NULLIF(CONCAT_WS(' ', a.first_name, a.last_name), '')) AS reviewed_by_name,
+                   s.staff_number AS reviewed_by_staff_number,
+                   d.approved_at AS reviewed_at,
+                   d.rejection_reason
+            FROM documents d
+            JOIN patients p ON p.patient_id = d.patient_id
+            JOIN document_types dt ON dt.document_type_id = d.document_type_id
+            LEFT JOIN staff s ON s.user_id = d.approved_by_user_id
+            LEFT JOIN admins a ON a.user_id = d.approved_by_user_id
+            """;
+
+   
     public List<Map<String, Object>> searchDocumentsForStaff(String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
-            return jdbcTemplate.queryForList("""
-                    SELECT d.document_id, p.patient_id, p.first_name, p.last_name, p.id_number,
-                           dt.type_name, d.original_filename, d.status, d.uploaded_at
-                    FROM documents d
-                    JOIN patients p ON p.patient_id = d.patient_id
-                    JOIN document_types dt ON dt.document_type_id = d.document_type_id
+            return jdbcTemplate.queryForList(STAFF_SEARCH_SELECT + """
                     ORDER BY d.uploaded_at DESC
                     """);
         }
         String like = "%" + searchTerm + "%";
-        return jdbcTemplate.queryForList("""
-                SELECT d.document_id, p.patient_id, p.first_name, p.last_name, p.id_number,
-                       dt.type_name, d.original_filename, d.status, d.uploaded_at
-                FROM documents d
-                JOIN patients p ON p.patient_id = d.patient_id
-                JOIN document_types dt ON dt.document_type_id = d.document_type_id
+        return jdbcTemplate.queryForList(STAFF_SEARCH_SELECT + """
                 WHERE p.first_name LIKE ? OR p.last_name LIKE ? OR p.id_number LIKE ? OR dt.type_name LIKE ?
                 ORDER BY d.uploaded_at DESC
                 """, like, like, like, like);
@@ -124,10 +130,7 @@ public class DocumentDao {
                 """);
     }
 
-    /**
-     * Reviews a document through sp_review_document, but only while it is PENDING.
-     * The row is locked first so two reviewers cannot both decide the same document.
-     */
+   
     @Transactional
     public ReviewResult reviewIfPending(long documentId, String newStatus,
                                         long reviewedByUserId, String rejectionReason) {
@@ -153,7 +156,7 @@ public class DocumentDao {
                 "SELECT document_type_id, type_name FROM document_types ORDER BY type_name");
     }
 
-    /** Internal lookup used for download authorisation and review checks. */
+    
     public Optional<Map<String, Object>> findDocument(long documentId) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT document_id, patient_id, original_filename, storage_key, mime_type, status
