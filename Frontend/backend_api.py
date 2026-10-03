@@ -75,7 +75,7 @@ def _request(method, path, **kwargs) -> tuple[bool, Any]:
     except (requests.exceptions.RequestException, KeyError, ValueError):
         return False, {"error": f"Could not reach the backend. Is it running on {BASE_URL}?"}
     
-    #The backend rotates the token on login so that it is fetched again next time
+#The backend rotates the token on login so that it is fetched again next time
     if path.startswith("/api/auth/login"):
         st.session_state.pop("csrf", None)
     if response.status_code == 204:
@@ -245,6 +245,52 @@ def upload_document(file_bytes: bytes, filename: str, document_type_id: int):
         data= {"documentTypeId": str(document_type_id)},
         timeout = 60,
     )
+
+#-----Staff searches approved patients to request a document from them------
+
+def search_patients(term: str):
+    return _request("GET", "/api/patients/search", params= {"search": term})
+
+#Staff ask a patient for a document
+
+def request_document(patient_id, document_type_id, reason: str | None = None):
+    return _request(
+        "POST",
+        "/api/document-requests",
+        json= {
+            "patientId": patient_id,
+            "documentTypeId": document_type_id,
+            "requestReason": _clean(reason),
+        },
+    )
+
+#Patient asks for detail of their profile to be changed
+def submit_profile_change(field_name: str, new_value: str, reason: str | None = None):
+    return _request(
+        "POST",
+        "/api/profile-change-requests",
+        json= {
+            "fieldName": field_name,
+            "requestedValue": new_value,
+            "reason": _clean(reason),
+        },
+    )
+
+def get_profile_changes_for_patient(patient_id):
+    return _request("GET", f"/api/profile-change-requests/patient/{patient_id}")
+
+#Staff reviews the profile changes()
+def get_pending_profile_changes():
+    return _request("GET", "/api/profile-change-requests/pending")
+
+def resolve_profile_change(change_request_id, approve: bool):
+    return _request(
+        "PUT",
+        f"/api/profile-change-requests/{change_request_id}/resolve",
+        json= {"approve": approve},
+    )
+
+
 
 #=======ADMIN calls GET documents overview, patients, staff=========
 
