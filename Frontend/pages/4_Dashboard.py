@@ -264,7 +264,10 @@ if st.session_state.logged_in_role == "Patient":
             st.dataframe(activity)
 
 elif st.session_state.logged_in_role == "Staff":
-    tab1, tab2, tab3, tab4 = st.tabs(["Overview", "Manage Patient Documents", "Patient Registrations", "Reports"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "Overview", "Manage Patient Documents", "Patient Registrations", 
+        "Request a Document", "Profile Changes" ,"Reports"
+    ])
 
     with tab1:
         st.header(f"Welcome back, {st.session_state.logged_in_user}")
