@@ -66,7 +66,7 @@ def _request(method, path, **kwargs) -> tuple[bool, Any]:
             if changes_data:
                 headers.update(_csrf_headers(refresh = attempt == 2))
             response = _session().request(
-                method, f"{BASE_URL}{path}", timeout= TIMEOUT_SECONDS, headers= headers, **kwargs
+                method, f"{BASE_URL}{path}", timeout= timeout, headers= headers, **kwargs
             )
             #A rejected token is fetched again once
             if not (changes_data and response.status_code == 403 and "CSRF" in response.text):
@@ -222,7 +222,7 @@ def download_document(document_id) -> tuple[bool, Any]:
             f"{BASE_URL}/api/documents/{document_id}/download", timeout = 30
         )
     except requests.exceptions.RequestException:
-        return False, {"error", f"Could not reach the backend. Is it running on {BASE_URL}?"}
+        return False, {"error": f"Could not reach the backend. Is it running on {BASE_URL}?"}
 
     if response.status_code == 200:
         return True, response.content
@@ -241,7 +241,7 @@ def upload_document(file_bytes: bytes, filename: str, document_type_id: int):
     return _request(
         "POST",
         "/api/documents/upload",
-        files= {"files": (filename, file_bytes, "application/pdf")},
+        files= {"file": (filename, file_bytes, "application/pdf")},
         data= {"documentTypeId": str(document_type_id)},
         timeout = 60,
     )
