@@ -57,6 +57,7 @@ def _error_message(status_code, data):
     return f"Request failed ({status_code})."
 
 def _request(method, path, **kwargs) -> tuple[bool, Any]:
+    timeout = kwargs.pop("timeout", TIMEOUT_SECONDS)
     changes_data = method.upper() in ("POST", "PUT", "PATCH", "DELETE")
     base_headers = dict(kwargs.pop("headers", None) or {})
     try:
@@ -213,6 +214,26 @@ def review_document(document_id, new_status: str, rejection_reason: str | None =
             "rejectionReason": rejection_reason,
         },
     )
+
+#Staff must be able to open a document before approving/ rejecting
+def download(document_id) -> tuple[bool, Any]:
+    try:
+        response = _session().get(
+            f"{BASE_URL}/api/documents/{document_id}/download", timeout = 30
+        )
+    except requests.exceptions.RequestException:
+        return False, {"error", f"Could not reach the backend. Is it running on {BASE_URL}?"}
+
+    if response.status_code == 200:
+        return True, response.content
+
+    try:
+        data = response.json()
+    except ValueError:
+        data = {}
+    return False, {"error": _error_message(response.status_code, data)}
+
+
 
 #=======ADMIN calls GET documents overview, patients, staff=========
 

@@ -49,7 +49,7 @@ def finish_login(role, data):
     #Keeps the same session for every role so other page can rely on them
     st.session_state.logged_in_user = data["displayName"]
     st.session_state.logged_in_role = role
-    st.session_state.user_id = data.get["loginId"]
+    st.session_state.user_id = data.get("loginId")
     st.session_state.login_id = data.get("loginId")
     st.switch_page("pages/4_Dashboard.py")
 
