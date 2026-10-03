@@ -469,6 +469,14 @@ elif st.session_state.logged_in_role == "Admin":
             st.info("No Staff Members yet.")
         else:
             st.dataframe(staff_list)
+            st.download_button(
+                "Download Staff as PDF",
+                data= make_pdf("Staff Members", staff_list,
+                               ["first_name", "last_name", "staff_number", "job_title",
+                                "department", "email", "created_at"
+                                ]),
+                file_name = "staff_members.pdf", mime= "application/pdf", key= "admin_staff_pdf"
+                )
             
     with tab3:
         st.subheader("Document Reports")
