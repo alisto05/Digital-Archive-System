@@ -253,7 +253,53 @@ elif st.session_state.logged_in_role == "Staff":
                                     st.error(result.get("error", "Could not reject document."))
 
     with tab3:
-        st.subheader("Reports")
+        st.subheader("Pending Patient Registrations")
+        reg_ok, pending_patients = get_pending_patients()
+
+        if not reg_ok:
+            st.error(pending_patients.get("error", "Could not load  pending Registrations."))
+        elif not pending_patients:
+            st.info("No pending registrations for now.")
+        else:
+            for patient in pending_patients:
+                pid = patient["patient_id"]
+                with st.container(border= True):
+                    st.write(f"**{patient['first_name']} {patient['last_name']}**")
+                    st.caption(f"ID Number: {patient['id_number']} | Registered: {patient['created_at']}")
+
+                    if st.toggle("Show registration details", key= f"reg_details_{pid}"):
+                        profile_ok, profile = get_patient_profile(pid)
+
+                        if not profile_ok:
+                            st.error(profile.get("error", "Could not the details."))
+                        else:
+                            details = [
+                                ("Date of birth", profile.get("date_of_birth")),
+                                ("Mobile Phone", profile.get("mobile_phone")),
+                                ("Email", profile.get("email")),
+                                ("Address", profile.get("address_line")),
+                                ("City", profile.get("city")),
+                                ("Province", profile.get("province")),
+                                ("Medical Aid", profile.get("provider") if profile.get("has_medical_aid") else "None"),
+                            ]
+                            for label, value in details:
+                                st.write(f"**{label}:** {value if value not in (None, '') else '--'}")
+                    col_approve, col_reject = st.columns(2)
+                    with col_approve:
+                        if st.button("Approve", key= f"reg_approve_{pid}"):
+                            done, result = update_patient_status(pid, "APPROVED")
+                            if done:
+                                st.rerun()
+                            else:
+                                st.error(result.get("error", "Could not approve this patient."))
+                    with col_reject:
+                        if st.button("Reject", key=f"reg_reject_{pid}"):
+                            done, result = update_patient_status(pid, "REJECTED")
+                            if done:
+                                st.rerun()
+                            else:
+                                st.error(result.get("error", "Could not reject this patient."))
+
         stats_ok, stats = get_staff_dashboard_stats()
         if not stats_ok:
             st.error(stats.get("error", "Could not load report stats."))
