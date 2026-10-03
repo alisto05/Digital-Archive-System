@@ -7,11 +7,13 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class DocumentDao {
@@ -87,24 +89,31 @@ public class DocumentDao {
     }
 
    
+    private static final String STAFF_SEARCH_SELECT = """
+            SELECT d.document_id, p.patient_id, p.first_name, p.last_name, p.id_number,
+                   dt.type_name, d.original_filename, d.status, d.uploaded_at,
+                   d.approved_by_user_id AS reviewed_by_user_id,
+                   COALESCE(NULLIF(CONCAT_WS(' ', s.first_name, s.last_name), ''),
+                            NULLIF(CONCAT_WS(' ', a.first_name, a.last_name), '')) AS reviewed_by_name,
+                   s.staff_number AS reviewed_by_staff_number,
+                   d.approved_at AS reviewed_at,
+                   d.rejection_reason
+            FROM documents d
+            JOIN patients p ON p.patient_id = d.patient_id
+            JOIN document_types dt ON dt.document_type_id = d.document_type_id
+            LEFT JOIN staff s ON s.user_id = d.approved_by_user_id
+            LEFT JOIN admins a ON a.user_id = d.approved_by_user_id
+            """;
+
+   
     public List<Map<String, Object>> searchDocumentsForStaff(String searchTerm) {
         if (searchTerm == null || searchTerm.isBlank()) {
-            return jdbcTemplate.queryForList("""
-                    SELECT d.document_id, p.patient_id, p.first_name, p.last_name, p.id_number,
-                           dt.type_name, d.original_filename, d.status, d.uploaded_at
-                    FROM documents d
-                    JOIN patients p ON p.patient_id = d.patient_id
-                    JOIN document_types dt ON dt.document_type_id = d.document_type_id
+            return jdbcTemplate.queryForList(STAFF_SEARCH_SELECT + """
                     ORDER BY d.uploaded_at DESC
                     """);
         }
         String like = "%" + searchTerm + "%";
-        return jdbcTemplate.queryForList("""
-                SELECT d.document_id, p.patient_id, p.first_name, p.last_name, p.id_number,
-                       dt.type_name, d.original_filename, d.status, d.uploaded_at
-                FROM documents d
-                JOIN patients p ON p.patient_id = d.patient_id
-                JOIN document_types dt ON dt.document_type_id = d.document_type_id
+        return jdbcTemplate.queryForList(STAFF_SEARCH_SELECT + """
                 WHERE p.first_name LIKE ? OR p.last_name LIKE ? OR p.id_number LIKE ? OR dt.type_name LIKE ?
                 ORDER BY d.uploaded_at DESC
                 """, like, like, like, like);
@@ -122,17 +131,39 @@ public class DocumentDao {
                 """);
     }
 
-    public void reviewDocument(long documentId, String newStatus, long reviewedByUserId, String rejectionReason) {
-        MapSqlParameterSource params = new MapSqlParameterSource()
+   
+    @Transactional
+    public ReviewResult reviewIfPending(long documentId, String newStatus,
+                                        long reviewedByUserId, String rejectionReason) {
+        List<String> status = jdbcTemplate.queryForList(
+                "SELECT status FROM documents WHERE document_id = ? FOR UPDATE", String.class, documentId);
+        if (status.isEmpty()) {
+            return ReviewResult.NOT_FOUND;
+        }
+        if (!"PENDING".equals(status.get(0))) {
+            return ReviewResult.NOT_PENDING;
+        }
+
+        reviewDocumentCall.execute(new MapSqlParameterSource()
                 .addValue("p_document_id", documentId)
                 .addValue("p_new_status", newStatus)
                 .addValue("p_reviewed_by_user_id", reviewedByUserId)
-                .addValue("p_rejection_reason", rejectionReason);
-        reviewDocumentCall.execute(params);
+                .addValue("p_rejection_reason", rejectionReason));
+        return ReviewResult.REVIEWED;
     }
 
     public List<Map<String, Object>> getDocumentTypes() {
         return jdbcTemplate.queryForList(
                 "SELECT document_type_id, type_name FROM document_types ORDER BY type_name");
+    }
+
+   
+    public Optional<Map<String, Object>> findDocument(long documentId) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT document_id, patient_id, original_filename, storage_key, mime_type, status
+                FROM documents
+                WHERE document_id = ?
+                """, documentId);
+        return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
     }
 }
