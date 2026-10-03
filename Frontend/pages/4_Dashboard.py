@@ -373,6 +373,10 @@ elif st.session_state.logged_in_role == "Admin":
             st.info("No patients have registered yet.")
         else:
             st.dataframe(patients)
+            st.download_button(
+                "Download ppatients as PDF", data= make_pdf("All Patients", patients),
+                file_name= "all_patients.pdf", mime= "application/pdf", key= "admin_patients_pdf"
+            )
 
     with tab2:
         st.subheader("Add a staff member")
