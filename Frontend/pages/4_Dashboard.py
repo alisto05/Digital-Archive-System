@@ -4,8 +4,27 @@ from backend_api import(get_pending_documents_for_staff, get_staff_dashboard_sta
                         review_document, get_patient_profile, get_patient_documents, get_document_requests_for_patient, 
                         get_recent_activity_for_patient, get_admin_overview, get_all_staff, get_all_patients,
                         register_staff, register_admin, get_pending_patients, update_patient_status, download_document, 
-                        get_document_types, upload_document)
-from pdf_export import make_pdf
+                        get_document_types, upload_document, search_patients, request_document, submit_profile_change,
+                        get_profile_changes_for_patient, get_pending_profile_changes, resolve_profile_change)
+from pdf_export import make_pdf, make_patient_confirmation, make_staff_confirmation
+from formatting import fmt_datetime, fmt_date, format_rows
+
+#the profile details the backendlets a patient change except names& ID 
+PROFILE_FIELD_LABELS = {
+    "address_line": "Address",
+    "city": "City",
+    "province": "Province",
+    "postal_code": "Postal Code",
+    "home_phone": "Home Phone",
+    "work_phone": "Work Phone",
+    "mobile_phone": "Mobile Phone",
+    "secondary_phone": "Secondary Phone",
+    "email": "Email",
+    "secondary_email": "Secondary Phone",
+    "provider": "Medical Aid Provider",
+    "membership_number": "Medical Aid Membership Number",
+}
+MEDICAL_AID_FIELDS = ("provider", "membership_number")
 
     
 if "selected_role" not in st.session_state:
@@ -17,6 +36,10 @@ if "logged_in_role" not in st.session_state:
 if "upload_counter" not in st.session_state:
     st.session_state.upload_counter = 0
 
+#Emptying the request a change box after a successful request
+if "change_counter" not in st.session_state:
+    st.session_state.change_counter = 0
+
 nav_bar()
 
 st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
@@ -27,6 +50,33 @@ if st.session_state.logged_in_role == "Patient":
 
     with tab1:
         st.header(f"Welcome back, {st.session_state.logged_in_user}")
+    #POR 
+        my_profile_ok, my_profile = get_patient_profile(st.session_state.patient_id)
+        activity_ok, my_activity = get_recent_activity_for_patient(st.session_state.patient_id)
+        approval = None
+        if activity_ok:
+            approval = next((a for a in my_activity if a.get("Action") == "Registration approved"), None)
+
+        if my_profile_ok:
+            st.success("Your registration with SyncPoint is confirmed. You are a registered patient.")
+            with st.container(border= True):
+                st.write("**Proof of Registration**")
+                st.caption(
+                    f"Registration date: {fmt_date(approval.get('Date')) if approval else '-'} |  "
+                    f"Approved by: {approval.get('By') if approval else '-'}"
+                )
+                st.download_button(
+                    "Download proof of registration (PDF)",
+                    data= make_patient_confirmation(
+                        st.session_state.patient_id, my_profile,
+                        approval.get("Date") if approval else None,
+                        approval.get("By") if approval else None,
+                    ),
+                    file_name= "SymcPoint_proof_of_registration.pdf", mime= "application/pdf",
+                    key= "patient_confirmation_pdf",
+                    help= "The PDF can be printed. Editing and copying are switched off."
+                )
+
         requests_ok, document_requests = get_document_requests_for_patient(st.session_state.patient_id)
 
         if not requests_ok:
@@ -75,10 +125,58 @@ if st.session_state.logged_in_role == "Patient":
                 st.caption("**Medical Aid**")
                 st.write("Not on medical aid")
 
-        st.button(
-            "REQUEST CHANGE", disabled= True,
-           ####### help= "Coming soon"
-        )
+        #Request a change-------
+            st.divider()
+            st.subheader("Request a change")
+            st.caption("Staff will review your request. Your ID Number and your names cannot be changed.")
+
+            change_message = st.session_state.pop("change_success", None)
+            if change_message:
+                st.success(change_message)
+
+            available_fields = {
+                label: field for field, label in PROFILE_FIELD_LABELS.items()
+                if field not in MEDICAL_AID_FIELDS or profile.get("has_medical_aid")
+            } 
+            chosen_label = st.selectbox("What do you want to change?", list(available_fields.keys()), key= "change_field")
+            chosen_field = available_fields[chosen_field]
+            current_value = profile.get(chosen_field)
+            st.caption(f"Current value: {current_value if current_value not in (None, '') else '--'}")
+
+            new_value = st.text_input("New value", key= f"change_value_{st.session_state.change_counter}")
+            change_reason = st.text_area("Reason (optional)", key= f"change_reason_{st.session_state.change_counter}")
+
+            if st.button("Send change request", key= "send_change_request"):
+                if not new_value.strip():
+                    st.error("Please enter the new value.")
+                else:
+                    ok, result = submit_profile_change(chosen_field, new_value, change_reason)
+                    if ok:
+                        st.session_state.change_success = "Your request was sent. You can follow it in the table below."
+                        st.session_state.change_counter += 1
+                        st.rerun()
+                    else:
+                        st.error(result.get("error", "Could not send the request."))
+
+        st.divider()
+        st.subheader("My change request")
+        change_ok, my_changes = get_profile_changes_for_patient(st.session_state.patient_id)
+        if not change_ok:
+            st.error(my_changes.get("error", "Could not load your change requests."))
+        elif not my_changes:
+            st.info("You have not asked for any changes.")
+        else:
+            st.dataframe(format_rows([
+                {
+                    "Detail": PROFILE_FIELD_LABELS.get(c["field_name"], c["field_name"]),
+                    "Old Value": c.get("old_value") or "-",
+                    "Requested Value": c["requested_value"],
+                    "Status": c["status"],
+                    "Requested At": c["requested_at"],
+                    "Reviewed At": c.get("reviewed_at"),
+                }
+                for c in my_changes
+            ]))
 
     with tab3:
         st.subheader("Requested Documents")
