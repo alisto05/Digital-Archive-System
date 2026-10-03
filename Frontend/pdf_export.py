@@ -145,7 +145,7 @@ def _stamp(pdf: FPDF, lines: list[tuple[str, str]], x: float, y: float, w= 62):
 #Making Printing be the only one that is allowed------
 def _locked_output(pdf: FPDF) -> bytes:
     pdf.set_encryption(
-        owner_password= secrets.token_urlsafe(24)
+        owner_password= secrets.token_urlsafe(24),
         permissions= AccessPermission.PRINT_LOW_RES | AccessPermission.PRINT_HIGH_RES,
         encryption_method= EncryptionMethod.AES_128,
     )
@@ -168,7 +168,7 @@ def _certificate(heading, intro, name, sub_lines, statement, detail_lines, refer
 
     pdf.ln(4)
     pdf.set_font("Helvetica", "", 10)
-    pdf.cell(0, 6 _text(intro), align= "C", new_x= "LMARGIN", new_y= "NEXT")
+    pdf.cell(0, 6, _text(intro), align= "C", new_x= "LMARGIN", new_y= "NEXT")
 
     pdf.ln(4)
     pdf.set_font("Helvetica", "B", 15)
@@ -200,4 +200,55 @@ def _certificate(heading, intro, name, sub_lines, statement, detail_lines, refer
     _stamp(pdf, stamp_lines, x= pdf.w - 18 - 62, y= 208)
     return _locked_output(pdf)
 
+#Proof that the patient is registered at SyncPoint--------
+def make_patient_confirmation(patient_id, profile: dict, approve_at, approved_by) -> bytes:
+    full_name = " ".join(
+        part for part in (profile.get("title"), profile.get("first_name"),
+                          profile.get("middle_name"), profile.get("last_name")
+                          ) if part
+    )
+    issued = datetime.now()
+    registered = fmt_date(approve_at)
+    return _certificate(
+        heading = f"PROOF OF REGISTRATION {issued.year}",
+        intro = "It is hereby certified that",
+        name= full_name,
+        sub_lines= [f"(Date of Birth: {fmt_date(profile.get('date_of_birth'))})",
+                    f"(Id Number: {profile.get('id_number') or "-"})"],
+                    statement= "is registered as a patient of the SyncPoint Hospital Digital Archive System.",
+                    detail_lines= [
+                        ("Status", "REGISTERED (approved)"),
+                        ("Registration approved by", approved_by or "-"),
+                        ("Registration date", registered),
+                    ],
+                    reference= f"SP-P-{int(patient_id):06d}",
+                    stamp_lines= [("Date of issue", f"{issued:%Y-%m-%d}"), ("Registered", registered)],
+                    footer_note= "Issued electronically by SyncPoint. No signature is required. This document is for printing ONLY.",
+    )
+
+#Proof that the person is a registered staff member------
+def make_staff_confirmation(staff: dict) -> bytes:
+    title = staff.get("courtesy_title") or ""
+    full_name = f"{title} {staff.get('first_name', '')} {staff.get('last_name', '')}".strip()
+    issued = datetime.now()
+    registered = fmt_date(staff.get("created_at"))
+    details = [
+        ("Role", staff.get("job_title")),
+        ("Department", staff.get("department")),
+        ("Staff Number", staff.get("staff_number")),
+    ]
+    if staff.get("specialization"):
+        details.append(("Specialization", staff.get("specialization")))
+    details.append(("Registration Date", registered))
+    return _certificate(
+        heading = f"CONFIRMATION OF STAFF REGISTRATION {issued.year}",
+        intro= "It is hereby certified that",
+        name= full_name,
+        sub_lines= [f"(Staff Number: {staff.get('staff_number') or '-'})"],
+        statement= "is registered as a member of staff of the SyncPoint Hospital Digital Archive System.",
+        detail_lines= details,
+        reference= f"SP-S-{int(staff.get('staff_id') or 0):06d}",
+        stamp_lines= [("Date of issue", f"{issued:%Y-%m-%d}"), ("Registered", registered)],
+        footer_note= "Issued electronically by SyncPoint. No signature is required. This document is for printing ONLY.",
+        )
 
