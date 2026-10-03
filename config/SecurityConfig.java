@@ -45,7 +45,6 @@ public class SecurityConfig {
         return new HttpSessionCsrfTokenRepository();
     }
 
-  n
     @Bean
     public SessionAuthenticationStrategy sessionAuthenticationStrategy(
             CsrfTokenRepository csrfTokenRepository) {
