@@ -79,7 +79,7 @@ def _top_logo(pdf: FPDF, x= None, y= 8, w= 28):
 #-------------Table Report-----------
 def make_pdf(title: str, rows: list[dict], columns: list[str] | None = None) -> bytes:
     rows = format_rows(rows)
-    pdf = FPDF(orientation="L", unit="mm", format= "A4")
+    pdf = BrandedPDF(orientation="L", unit="mm", format= "A4")
     pdf.set_auto_page_break(auto= True, margin= 15)
     pdf.add_page()
 
@@ -185,7 +185,7 @@ def _certificate(heading, intro, name, sub_lines, statement, detail_lines, refer
     for label, value in detail_lines:
         pdf.set_x(40)
         pdf.set_font("Helvetica", "B", 10)
-        pdf.cell(55, 77, _text(label))
+        pdf.cell(55, 7, _text(label))
         pdf.set_font("Helvetica", "", 10)
         pdf.cell(0, 7, _text(value), new_x= "LMARGIN", new_y= "NEXT")
 
@@ -214,7 +214,7 @@ def make_patient_confirmation(patient_id, profile: dict, approve_at, approved_by
         intro = "It is hereby certified that",
         name= full_name,
         sub_lines= [f"(Date of Birth: {fmt_date(profile.get('date_of_birth'))})",
-                    f"(Id Number: {profile.get('id_number') or "-"})"],
+                    f"(Id Number: {profile.get('id_number') or '-'})"],
                     statement= "is registered as a patient of the SyncPoint Hospital Digital Archive System.",
                     detail_lines= [
                         ("Status", "REGISTERED (approved)"),
