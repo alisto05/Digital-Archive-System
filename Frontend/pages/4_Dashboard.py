@@ -609,7 +609,7 @@ elif st.session_state.logged_in_role == "Admin":
                 first_name = st.text_input("First Name*")
                 job_title = st.selectbox("Job Title*", ["Doctor", "Nurse", "Receptionist"])
                 department = st.text_input("Department")
-                email = st.text_input("Email")
+                email = st.text_input("Email*")
                 password = st.text_input("Initial password*", type= "password")
             with col2:
                 last_name = st.text_input("Last Name*")
@@ -620,8 +620,10 @@ elif st.session_state.logged_in_role == "Admin":
             submitted = st.form_submit_button("Add Staff Member")
 
         if submitted:
-            if not first_name.strip() or not last_name.strip() or not password:
-                st.error("First name, last name and the password are required.")
+            if not first_name.strip() or not last_name.strip() or not email.strip() or not password:
+                st.error("First name, last name, email and the password are required.")
+            elif "@" not in email or "." not in email.split()("@")[-1]:
+                st.error("Please enter a valid email address.")
             elif password != confirm_password:
                 st.error("The two passwords do not match.")
             else:
