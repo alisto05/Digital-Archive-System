@@ -40,7 +40,7 @@ public class StaffDao {
                 );
     }
 
-   
+    
     @Transactional
     public long registerStaff(StaffRegistrationRequest r, String passwordHash,
                                String staffNumber, String username) {
@@ -65,10 +65,11 @@ public class StaffDao {
         return staffId;
     }
 
+   
     public Optional<Map<String, Object>> getStaffProfile(long staffId) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT staff_id, first_name, last_name, staff_number, job_title,
-                       courtesy_title, department, email, specialization
+                       courtesy_title, department, email, specialization, created_at
                 FROM staff
                 WHERE staff_id = ?
                 """, staffId);
@@ -93,7 +94,7 @@ public class StaffDao {
         return count != null && count > 0;
     }
 
-    
+   
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
