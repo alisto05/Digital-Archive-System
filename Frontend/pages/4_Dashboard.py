@@ -150,7 +150,7 @@ if st.session_state.logged_in_role == "Patient":
                 if not new_value.strip():
                     st.error("Please enter the new value.")
                 else:
-                    ok, result = submit_profile_change(chosen_field, new_value, change_reason)
+                    ok, result = submit_profile_change(chosen_field, new_value.strip(), change_reason)
                     if ok:
                         st.session_state.change_success = "Your request was sent. You can follow it in the table below."
                         st.session_state.change_counter += 1
@@ -187,7 +187,7 @@ if st.session_state.logged_in_role == "Patient":
         elif not document_requests:
             st.info("No document requests from staff right now.")
         else:
-            st.dataframe(format_rows[
+            st.dataframe(format_rows([
                 {
                     "Document Needed": r["type_name"],
                     "Reason": r.get("request_reason") or "-",
@@ -195,7 +195,7 @@ if st.session_state.logged_in_role == "Patient":
                     "Requested At": r["requested_at"],
                 }
                 for r in document_requests
-            ])
+            ]))
 
         st.divider()
         st.subheader("Your Uploaded Documents")
