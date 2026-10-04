@@ -2,12 +2,14 @@ package com.syncpoint.archive.controller;
 
 import com.syncpoint.archive.dao.StaffDao;
 import com.syncpoint.archive.dto.StaffRegistrationRequest;
+import com.syncpoint.archive.security.AppUserDetails;
 import com.syncpoint.archive.util.PasswordPolicy;
 
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,7 +33,16 @@ public class StaffController {
         this.staffDao = staffDao;
         this.passwordEncoder = passwordEncoder;
     }
-
+  
+@GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> me(@AuthenticationPrincipal AppUserDetails me) {
+        if (me.staffId() == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only staff have a staff profile.");
+        }
+        return staffDao.getStaffProfile(me.staffId())
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Staff profile not found."));
+    }
    
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody StaffRegistrationRequest request) {
