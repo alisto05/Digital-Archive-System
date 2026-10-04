@@ -10,7 +10,7 @@ from formatting import fmt_date, format_rows
 
 LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo-removebg.png")
 BRAND = (21, 71, 160)   #The blue on in the logo
-WATERMARK_OPACITY = 0.07    #0= invisible, 1 = solid
+WATERMARK_OPACITY = 0.20    #0= invisible, 1 = solid
 WATERMARK_SIZE_MM = 22  #size of every small logo
 WATERMARK_ANGLE = 30    #degrees of small logo sliding
 
