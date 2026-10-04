@@ -622,7 +622,7 @@ elif st.session_state.logged_in_role == "Admin":
         if submitted:
             if not first_name.strip() or not last_name.strip() or not email.strip() or not password:
                 st.error("First name, last name, email and the password are required.")
-            elif "@" not in email or "." not in email.split()("@")[-1]:
+            elif "@" not in email or "." not in email.split("@")[-1]:
                 st.error("Please enter a valid email address.")
             elif password != confirm_password:
                 st.error("The two passwords do not match.")
