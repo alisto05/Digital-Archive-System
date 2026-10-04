@@ -20,7 +20,7 @@ PROFILE_FIELD_LABELS = {
     "mobile_phone": "Mobile Phone",
     "secondary_phone": "Secondary Phone",
     "email": "Email",
-    "secondary_email": "Secondary Phone",
+    "secondary_email": "Secondary email",
     "provider": "Medical Aid Provider",
     "membership_number": "Medical Aid Membership Number",
 }
@@ -72,7 +72,7 @@ if st.session_state.logged_in_role == "Patient":
                         approval.get("Date") if approval else None,
                         approval.get("By") if approval else None,
                     ),
-                    file_name= "SymcPoint_proof_of_registration.pdf", mime= "application/pdf",
+                    file_name= "SyncPoint_proof_of_registration.pdf", mime= "application/pdf",
                     key= "patient_confirmation_pdf",
                     help= "The PDF can be printed. Editing and copying are switched off."
                 )
@@ -139,7 +139,7 @@ if st.session_state.logged_in_role == "Patient":
                 if field not in MEDICAL_AID_FIELDS or profile.get("has_medical_aid")
             } 
             chosen_label = st.selectbox("What do you want to change?", list(available_fields.keys()), key= "change_field")
-            chosen_field = available_fields[chosen_field]
+            chosen_field = available_fields[chosen_label]
             current_value = profile.get(chosen_field)
             st.caption(f"Current value: {current_value if current_value not in (None, '') else '--'}")
 
@@ -159,7 +159,7 @@ if st.session_state.logged_in_role == "Patient":
                         st.error(result.get("error", "Could not send the request."))
 
         st.divider()
-        st.subheader("My change request")
+        st.subheader("My change requests")
         change_ok, my_changes = get_profile_changes_for_patient(st.session_state.patient_id)
         if not change_ok:
             st.error(my_changes.get("error", "Could not load your change requests."))
@@ -187,7 +187,7 @@ if st.session_state.logged_in_role == "Patient":
         elif not document_requests:
             st.info("No document requests from staff right now.")
         else:
-            st.dataframe([
+            st.dataframe(format_rows[
                 {
                     "Document Needed": r["type_name"],
                     "Reason": r.get("request_reason") or "-",
@@ -217,10 +217,10 @@ if st.session_state.logged_in_role == "Patient":
                 }
                 for d in documents
             ]
-            st.dataframe(my_document_rows)
+            st.dataframe(format_rows(my_document_rows))
             st.download_button(
                 "Download as PDF", data= make_pdf("My Documents", my_document_rows),
-                file_name= "my_document.pdf", mime= "application/pdf", key= "my_documents_pdf"
+                file_name= "my_documents.pdf", mime= "application/pdf", key= "my_documents_pdf"
             )
 
         st.divider()
@@ -261,7 +261,7 @@ if st.session_state.logged_in_role == "Patient":
         elif not activity:
             st.info("No activity yet.")
         else:
-            st.dataframe(activity)
+            st.dataframe(format_rows(activity))
 
 elif st.session_state.logged_in_role == "Staff":
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
@@ -282,7 +282,7 @@ elif st.session_state.logged_in_role == "Staff":
                 st.metric("Documents waiting for review", stats["pending_approvals"])
             with col2:
                 st.metric("Patient registrations waiting", stats["pending_patient_registrations"])
-                st.caption("Review them in the 'Manage Patient Document' and 'Patient Registrations' tabs.")
+                st.caption("Review them in the 'Manage Patient Documents' and 'Patient Registrations' tabs.")
                 
     with tab2:
         st.subheader("Patient Documents")
@@ -315,7 +315,7 @@ elif st.session_state.logged_in_role == "Staff":
 
                 with st.container(border= True):
                     st.write(f"**{d['first_name']} {d['last_name']}** - {d['type_name']}")
-                    st.caption(f"{d['original_filename']} | uploaded {d['uploaded_at']}")
+                    st.caption(f"{d['original_filename']} | uploaded {fmt_datetime(d['uploaded_at'])}")
 
                     if not opened:
                         if st.button("Open Document", key= f"open_{doc_id}"):
@@ -365,7 +365,7 @@ elif st.session_state.logged_in_role == "Staff":
         reg_ok, pending_patients = get_pending_patients()
 
         if not reg_ok:
-            st.error(pending_patients.get("error", "Could not load  pending Registrations."))
+            st.error(pending_patients.get("error", "Could not load pending Registrations."))
         elif not pending_patients:
             st.info("No pending registrations for now.")
         else:
@@ -373,7 +373,8 @@ elif st.session_state.logged_in_role == "Staff":
                 pid = patient["patient_id"]
                 with st.container(border= True):
                     st.write(f"**{patient['first_name']} {patient['last_name']}**")
-                    st.caption(f"ID Number: {patient['id_number']} | Registered: {patient['created_at']}")
+                    st.caption(f"ID Number: {patient['id_number']} | Registered: {fmt_datetime(patient['created_at'])}")
+
 
 #------The profile is only fetched when the toggle is on so that the page does not call the backend for every patient on every click-----
 
@@ -381,7 +382,7 @@ elif st.session_state.logged_in_role == "Staff":
                         profile_ok, profile = get_patient_profile(pid)
 
                         if not profile_ok:
-                            st.error(profile.get("error", "Could not the details."))
+                            st.error(profile.get("error", "Could not load the details."))
                         else:
                             details = [
                                 ("Date of birth", profile.get("date_of_birth")),
@@ -431,13 +432,13 @@ elif st.session_state.logged_in_role == "Staff":
                 st.session_state.request_patient_results = []
                 st.error(found.get("error", "Could not search for patients."))
 
-        found_patients = st.session_state.get("request_patient_result", [])
+        found_patients = st.session_state.get("request_patient_results", [])
         if found_patients:
             patient_options = {
                 f"{p['first_name']} {p['last_name']} - ID {p['id_number']}": p["patient_id"]
                 for p in found_patients
             }
-            chosen_patient = st.session_state("Patient", list(patient_options.keys()), key= "request_patient_choice")
+            chosen_patient = st.selectbox("Patient", list(patient_options.keys()), key= "request_patient_choice")
 
             types_ok, request_types = get_document_types()
             if not types_ok:
@@ -460,7 +461,46 @@ elif st.session_state.logged_in_role == "Staff":
         elif st.session_state.get("request_patient_results") == [] and patient_term:
             st.caption("Search for a patient above. Only approved can be founded.")
 
-            
+#TAB5 Staff approve/ reject the profile changes
+
+    with tab5:
+        st.subheader("Profile change requests")
+        change_ok, pending_changes = get_pending_profile_changes()
+
+        if not change_ok:
+            st.error(pending_changes.get("error", "Could not load the change requests."))
+        elif not pending_changes:
+            st.info("No profile change requests right now.")
+        else:
+            for change in pending_changes:
+                crd = change["change_request_id"]
+                with st.container(border= True):
+                    st.write(f"**{change['first_name']} {change['last_name']}** wants to change."
+                             f"**{PROFILE_FIELD_LABELS.get(change['field_name'], change['field_name'])}**")
+                    st.write(f"From: {change.get('old_value') or '--'}")
+                    st.write(f"To: **{change['requested_value']}**")
+                    if change.get("reason"):
+                        st.caption(f"Reason: {change['reason']}")
+                    st.caption(f"Requested: {fmt_datetime(change['requested_at'])}")
+
+                    col_approve, col_reject = st.columns(2)
+
+                    with col_approve:
+                        if st.button("Approve", key= f"change_approve_{crd}"):
+                            done, result = resolve_profile_change(crd, True)
+                            if done:
+                                st.rerun()
+                            else:
+                                st.error(result.get("error", "Could not approve this request."))
+                    with col_reject:
+                        if st.button("Reject", key= f"change_reject_{crd}"):
+                            done, result = resolve_profile_change(crd, False)
+                            if done:
+                                st.rerun()
+                            else:
+                                st.error(result.get("error", "Could not reject this request."))
+    with tab6:
+        st.subheader("Reports")
         stats_ok, stats = get_staff_dashboard_stats()
         if not stats_ok:
             st.error(stats.get("error", "Could not load report stats."))
@@ -529,10 +569,27 @@ elif st.session_state.logged_in_role == "Admin":
         elif not patients:
             st.info("No patients have registered yet.")
         else:
-            st.dataframe(patients)
+        #seeing who approv/rejected a registration
+            staff_look_ok, staff_look = get_all_staff()
+            staff_names = {}
+            if staff_look_ok:
+                staff_names = {
+                    s_row["staff_id"]: f"{s_row['first_name']} {s_row['last_name']} ({s_row['job_title']})"
+                    for s_row in staff_look
+                }
+            patient_rows = []
+            for patient in patients:
+                row = dict(patient)
+                reviewer_id = row.pop("reviewed_by_staff_id", None)
+                row["reviewed_by"] = staff_names.get(reviewer_id, "-") if reviewer_id else "-"
+                patient_rows.append(row)
+            patient_columns = ["patient_id", "first_name", "last_name", "id_number", "status",
+                               "reviewed_by", "reviewed_at", "created_at"]
+
+            st.dataframe(format_rows(patient_rows), column_order= patient_columns)
             st.download_button(
-                "Download patients as PDF", data= make_pdf("All Patients", patients),
-                file_name= "all_patients.pdf", mime= "application/pdf", key= "admin_patients_pdf"
+                "Download patients as PDF", data= make_pdf("All Patients", patient_rows, patient_columns),
+                file_name= "all_patients.pdf", mime= "application/pdf", key= "admin_patient_pdf"
             )
 
     with tab2:
@@ -625,7 +682,23 @@ elif st.session_state.logged_in_role == "Admin":
         elif not staff_list:
             st.info("No Staff Members yet.")
         else:
-            st.dataframe(staff_list)
+            st.dataframe(format_rows(staff_list))
+        #Confirmation PDF for one staff member
+            st.write("**Staff Confirmation**")
+            staff_labels = [
+                f"{m['first_name']} {m['last_name']} - {m['staff_number']} ({m['job_title']})" for m in staff_list
+            ]
+            chosen_index = st.selectbox(
+                "Staff Member", range(len(staff_list)), format_func= lambda i: staff_labels[i],
+                key= "confirmation_staff_choice"
+            )
+            st.download_button(
+                "Download Staff confirmation (PDF)",
+                data= make_staff_confirmation(staff_list[chosen_index]),
+                file_name= f"SyncPoint_staff_confirmation_{staff_list[chosen_index]['staff_number']}.pdf",
+                mime= "application/pdf", key= "staff_confirmation_pdf",
+                help= "The PDF can be printed. Editing and copying are switched off."
+            )
             st.download_button(
                 "Download Staff as PDF",
                 data= make_pdf("Staff Members", staff_list,
@@ -645,12 +718,26 @@ elif st.session_state.logged_in_role == "Admin":
         elif not documents:
             st.info("No documents found.")
         else:
-            st.dataframe(documents)
+        #backend sends who reviewed each document
+            report_rows = []
+            for doc in documents:
+                row = dict(doc)
+                reviewer = row.get("reviewed_by_name")
+                if reviewer and row.get("reviewed_by_staff_number"):
+                    reviewer = f"{reviewer} ({row['reviewed_by_staff_number']})"
+                row["reviewed_by"] = reviewer or "-"
+                row["rejection_reason"] = row.get("rejection_reason") or "-"
+                report_rows.append(row)
+
+            report_columns = ["first_name", "last_name", "id_number", "type_name", 
+                              "original_filename", "status", "uploaded_at", "reviewed_by", "reviewed_at", "rejection_reason"]
+            st.dataframe(format_rows(report_rows), column_order= report_columns)
+
             st.download_button(
                 "Download Report as PDF",
-                data= make_pdf("Document Report", documents,
+                data= make_pdf("Document Report", report_rows,
                                ["first_name", "last_name", "id_number", "type_name",
-                                "original_filename", "status", "uploaded_at"
+                                "status", "uploaded_at", "reviewed_by", "reviewed_at", "rejection_reason"
                                 ]),
                 file_name= "document_report.pdf", mime= "application/pdf", key= "admin_in_documents_pdf"
             )
