@@ -275,8 +275,15 @@ elif st.session_state.logged_in_role == "Staff":
         if not stats_ok:
             st.error(stats.get("error", "Could not load dashboard stats."))
         else:
-            st.metric("Pending Approvals", stats["pending_approvals"])
+        #Making Documents and patient registration waiting for review
+            col1, col2 = st.columns(2)
 
+            with col1:
+                st.metric("Documents waiting for review", stats["pending_approvals"])
+            with col2:
+                st.metric("Patient registrations waiting", stats["pending_patient_registrations"])
+                st.caption("Review them in the 'Manage Patient Document' and 'Patient Registrations' tabs.")
+                
     with tab2:
         st.subheader("Patient Documents")
         search_term = st.text_input("Search by patient name or Document type")
@@ -403,8 +410,36 @@ elif st.session_state.logged_in_role == "Staff":
                             else:
                                 st.error(result.get("error", "Could not reject this patient."))
 
+#New tab Staff asks a patient for a document
     with tab4:
-        st.subheader("Reports")
+        st.subheader("Request a document from a patient")
+        st.caption("The patient sees the request on their Overview and in 'My Document'.")
+
+        request_message = st.session_state.pop("doc_request_success", None)
+        if request_message:
+            st.success(request_message)
+
+        patient_term = st.text_input("Patient name or ID Number (at least 2 characters)", key= "request_patient_term")
+
+#The search runs only when the button is pressed
+
+        if st.button("Search patients", key= "request_patient_search"):
+            found_ok, found = search_patients(patient_term)
+            if found_ok:
+                st.session_state.request_patient_results = found
+            else:
+                st.session_state.request_patient_results = []
+                st.error(found.get("error", "Could not search for patients."))
+
+        found_patients = st.session_state.get("request_patient_result", [])
+        if found_patients:
+            patient_options = {
+                f"{p['first_name']} {p['last_name']} - ID {p['id_number']}": p["patient_id"]
+                for p in found_patients
+            }
+            chosen_patient = st.session_state("Patient", list(patient_options.keys()), key= "request_patient_choice")
+
+            
         stats_ok, stats = get_staff_dashboard_stats()
         if not stats_ok:
             st.error(stats.get("error", "Could not load report stats."))
