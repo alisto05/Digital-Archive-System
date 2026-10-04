@@ -1,3 +1,5 @@
 streamlit >= 1.45
 requests >= 2.32
 fpdf2 >= 2.8
+#Needed for the print-only (encrypted)
+cryptography >= 42
