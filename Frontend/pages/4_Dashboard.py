@@ -87,7 +87,7 @@ def request_needs_upload(req, doc):
     if req.get("status") == "CANCELLED":
         return False
     if doc is None:
-        return req.get("status") != "FULLFILLED"
+        return req.get("status") != "FULFILLED"
     return doc.get("status") == "REJECTED"
 
     
