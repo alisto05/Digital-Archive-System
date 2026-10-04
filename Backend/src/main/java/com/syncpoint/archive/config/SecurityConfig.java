@@ -28,6 +28,7 @@ import jakarta.servlet.DispatcherType;
 
 import java.util.List;
 
+
 @Configuration
 public class SecurityConfig {
 
@@ -44,7 +45,7 @@ public class SecurityConfig {
         return new HttpSessionCsrfTokenRepository();
     }
 
-   
+    
     @Bean
     public SessionAuthenticationStrategy sessionAuthenticationStrategy(
             CsrfTokenRepository csrfTokenRepository) {
@@ -54,6 +55,7 @@ public class SecurityConfig {
         ));
     }
 
+  
     @Bean
     public LogoutHandler loginHistoryLogoutHandler(AuthDao authDao) {
         return (request, response, authentication) -> {
@@ -99,7 +101,7 @@ public class SecurityConfig {
                                 "/api/status",
                                 "/api/auth/csrf").permitAll()
 
-                       
+                        
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/documents/types").authenticated()
 
@@ -123,7 +125,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/profile-change-requests/pending").hasRole("STAFF")
                         .requestMatchers(HttpMethod.PUT, "/api/profile-change-requests/*/resolve").hasRole("STAFF")
 
-                      
+                        
                         .requestMatchers(HttpMethod.POST, "/api/profile-change-requests").hasRole("PATIENT")
 
                       
@@ -140,7 +142,7 @@ public class SecurityConfig {
                                 "/api/document-requests/patient/*",
                                 "/api/patients/*/profile").hasAnyRole("PATIENT", "STAFF")
 
-                       
+                      
                         .anyRequest().denyAll()
                 )
                 .logout(logout -> logout
@@ -167,4 +169,3 @@ public class SecurityConfig {
         return http.build();
     }
 }
-
