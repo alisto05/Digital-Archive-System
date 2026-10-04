@@ -439,6 +439,27 @@ elif st.session_state.logged_in_role == "Staff":
             }
             chosen_patient = st.session_state("Patient", list(patient_options.keys()), key= "request_patient_choice")
 
+            types_ok, request_types = get_document_types()
+            if not types_ok:
+                st.error(request_types.get("error", "Could not load the document types."))
+            else:
+                request_type_ids = {t["type_name"]: t["document_type_id"] for t in request_types}
+                chosen_request_type = st.selectbox("Document needed", list(request_type_ids.keys()), key= "request_type_choice")
+                request_reason = st.text_area("Reason (optional)", key= "request_reason")
+
+                if st.button("Send request", key= "send_document_request"):
+                    ok, result = request_document(
+                        patient_options[chosen_patient], request_type_ids[chosen_request_type], request_reason
+                    )
+                    if ok:
+                        st.session_state.doc_request_success = f"Request for '{chosen_request_type}' sent to {chosen_patient.split(' - ')[0]}."
+                        st.session_state.request_patient_results = []
+                        st.rerun()
+                    else:
+                        st.error(result.get("error", "Could not sent the request."))
+        elif st.session_state.get("request_patient_results") == [] and patient_term:
+            st.caption("Search for a patient above. Only approved can be founded.")
+
             
         stats_ok, stats = get_staff_dashboard_stats()
         if not stats_ok:
