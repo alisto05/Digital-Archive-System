@@ -784,4 +784,4 @@ if "confirm_signout" not in st.session_state:
     st.session_state.confirm_signout = False
 
 if st.button("Sign Out"):
-    st.switch_page("pages/7_SignOut.py")
+    st.switch_page("pages/5_SignOut.py")
