@@ -1,5 +1,4 @@
-
-   package com.syncpoint.archive.dao;
+package com.syncpoint.archive.dao;
 
 import com.syncpoint.archive.dto.StaffRegistrationRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -66,11 +65,11 @@ public class StaffDao {
         return staffId;
     }
 
-    
+   
     public Optional<Map<String, Object>> getStaffProfile(long staffId) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
                 SELECT staff_id, first_name, last_name, staff_number, job_title,
-                       courtesy_title, department, email, specialization
+                       courtesy_title, department, email, specialization, created_at
                 FROM staff
                 WHERE staff_id = ?
                 """, staffId);
