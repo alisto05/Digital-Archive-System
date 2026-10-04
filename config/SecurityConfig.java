@@ -45,6 +45,7 @@ public class SecurityConfig {
         return new HttpSessionCsrfTokenRepository();
     }
 
+   
     @Bean
     public SessionAuthenticationStrategy sessionAuthenticationStrategy(
             CsrfTokenRepository csrfTokenRepository) {
@@ -54,7 +55,7 @@ public class SecurityConfig {
         ));
     }
 
-   
+    
     @Bean
     public LogoutHandler loginHistoryLogoutHandler(AuthDao authDao) {
         return (request, response, authentication) -> {
@@ -63,7 +64,7 @@ public class SecurityConfig {
                 try {
                     authDao.recordLogout(user.loginId());
                 } catch (DataAccessException ignored) {
-                  
+                    
                 }
             }
         };
@@ -90,7 +91,7 @@ public class SecurityConfig {
 
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
 
-                       
+                        
                         .requestMatchers(HttpMethod.POST,
                                 "/api/auth/login/patient",
                                 "/api/auth/login/staff",
@@ -100,20 +101,22 @@ public class SecurityConfig {
                                 "/api/status",
                                 "/api/auth/csrf").permitAll()
 
-                       
+                        
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/documents/types").authenticated()
 
+                       
                         .requestMatchers(HttpMethod.POST, "/api/staff/register").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/staff/me").hasRole("STAFF")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                      
+                       
                         .requestMatchers(HttpMethod.GET, "/api/dashboard/staff-stats")
                                 .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/approvals/pending-patients").hasRole("STAFF")
                         .requestMatchers(HttpMethod.GET, "/api/patients/search").hasRole("STAFF")
                         .requestMatchers(HttpMethod.PUT, "/api/approvals/patients/*/status").hasRole("STAFF")
-                      
+                       
                         .requestMatchers(HttpMethod.GET, "/api/documents/staff-search")
                                 .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/documents/pending-review").hasRole("STAFF")
@@ -125,10 +128,10 @@ public class SecurityConfig {
                       
                         .requestMatchers(HttpMethod.POST, "/api/profile-change-requests").hasRole("PATIENT")
 
-                      
+                       
                         .requestMatchers(HttpMethod.GET, "/api/approvals/patients/*/recent-activity")
                                 .hasAnyRole("PATIENT", "STAFF")
-                       
+                        
                         .requestMatchers(HttpMethod.GET, "/api/documents/*/download")
                                 .hasAnyRole("PATIENT", "STAFF", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/documents/upload")
@@ -139,7 +142,7 @@ public class SecurityConfig {
                                 "/api/document-requests/patient/*",
                                 "/api/patients/*/profile").hasAnyRole("PATIENT", "STAFF")
 
-                       
+                      
                         .anyRequest().denyAll()
                 )
                 .logout(logout -> logout
