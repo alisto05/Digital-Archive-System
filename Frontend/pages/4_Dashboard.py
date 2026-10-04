@@ -414,7 +414,7 @@ elif st.session_state.logged_in_role == "Staff":
 #New tab Staff asks a patient for a document
     with tab4:
         st.subheader("Request a document from a patient")
-        st.caption("The patient sees the request on their Overview and in 'My Document'.")
+        st.caption("The patient sees the request on their Overview and in 'My Documents'.")
 
         request_message = st.session_state.pop("doc_request_success", None)
         if request_message:
@@ -457,9 +457,9 @@ elif st.session_state.logged_in_role == "Staff":
                         st.session_state.request_patient_results = []
                         st.rerun()
                     else:
-                        st.error(result.get("error", "Could not sent the request."))
+                        st.error(result.get("error", "Could not send the request."))
         elif st.session_state.get("request_patient_results") == [] and patient_term:
-            st.caption("Search for a patient above. Only approved can be founded.")
+            st.caption("No approved patient found. Only approved can be founded.")
 
 #TAB5 Staff approve/ reject the profile changes
 
@@ -475,7 +475,7 @@ elif st.session_state.logged_in_role == "Staff":
             for change in pending_changes:
                 crd = change["change_request_id"]
                 with st.container(border= True):
-                    st.write(f"**{change['first_name']} {change['last_name']}** wants to change."
+                    st.write(f"**{change['first_name']} {change['last_name']}** wants to change "
                              f"**{PROFILE_FIELD_LABELS.get(change['field_name'], change['field_name'])}**")
                     st.write(f"From: {change.get('old_value') or '--'}")
                     st.write(f"To: **{change['requested_value']}**")
@@ -633,7 +633,7 @@ elif st.session_state.logged_in_role == "Admin":
                     st.session_state.staff_created = result
                     st.rerun()
                 else:
-                    st.error(result.get("error", "Could not add the staff Member."))
+                    st.error(result.get("error", "Could not add the staff member."))
 
         st.divider()
 
@@ -680,7 +680,7 @@ elif st.session_state.logged_in_role == "Admin":
         if not ok:
             st.error(staff_list.get("error", "Could not load staff."))
         elif not staff_list:
-            st.info("No Staff Members yet.")
+            st.info("No Staff members yet.")
         else:
             st.dataframe(format_rows(staff_list))
         #Confirmation PDF for one staff member
@@ -710,7 +710,7 @@ elif st.session_state.logged_in_role == "Admin":
             
     with tab3:
         st.subheader("Document Reports")
-        search_term = st.text_input("Search by patient name, ID, or doument type", key= "admin_doc_search")
+        search_term = st.text_input("Search by patient name, ID, or document type", key= "admin_doc_search")
         success, documents = get_documents_for_staff(search_term)
 
         if not success:
