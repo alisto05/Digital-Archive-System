@@ -55,7 +55,7 @@ public class SecurityConfig {
         ));
     }
 
-    
+   
     @Bean
     public LogoutHandler loginHistoryLogoutHandler(AuthDao authDao) {
         return (request, response, authentication) -> {
@@ -64,7 +64,7 @@ public class SecurityConfig {
                 try {
                     authDao.recordLogout(user.loginId());
                 } catch (DataAccessException ignored) {
-                    
+                   
                 }
             }
         };
@@ -91,7 +91,7 @@ public class SecurityConfig {
 
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
 
-                        
+                      
                         .requestMatchers(HttpMethod.POST,
                                 "/api/auth/login/patient",
                                 "/api/auth/login/staff",
@@ -101,16 +101,15 @@ public class SecurityConfig {
                                 "/api/status",
                                 "/api/auth/csrf").permitAll()
 
-                        
+                     
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/documents/types").authenticated()
 
-                       
                         .requestMatchers(HttpMethod.POST, "/api/staff/register").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/staff/me").hasRole("STAFF")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                       
+                      
                         .requestMatchers(HttpMethod.GET, "/api/dashboard/staff-stats")
                                 .hasAnyRole("STAFF", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/approvals/pending-patients").hasRole("STAFF")
@@ -125,7 +124,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/profile-change-requests/pending").hasRole("STAFF")
                         .requestMatchers(HttpMethod.PUT, "/api/profile-change-requests/*/resolve").hasRole("STAFF")
 
-                      
                         .requestMatchers(HttpMethod.POST, "/api/profile-change-requests").hasRole("PATIENT")
 
                        
