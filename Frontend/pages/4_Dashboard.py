@@ -75,7 +75,7 @@ def submission_label(req, doc, for_staff = False):
     if req.get("status") == "CANCELLED":
         return "Cancelled"
     if doc is None:
-        return "Submitted" if req.get("status") == "FULLFILLED" else "Not submitted yet"
+        return "Submitted" if req.get("status") == "FULFILLED" else "Not submitted yet"
     if doc.get("status") == "REJECTED":
         return "Rejected - waiting for a new upload" if for_staff else "Rejected - please upload again"
     if doc.get("status") == "APPROVED":
@@ -83,7 +83,7 @@ def submission_label(req, doc, for_staff = False):
     return "Submitted - waiting for staff review"
 
 #A request still needs a patients action if nothing has been uploaded
-def request_need_upload(req, doc):
+def request_needs_upload(req, doc):
     if req.get("status") == "CANCELLED":
         return False
     if doc is None:
@@ -149,7 +149,7 @@ if st.session_state.logged_in_role == "Patient":
         #counts requests the patient has not submitted or were rejected
             overview_docs_ok, overview_docs = get_patient_documents(st.session_state.patient_id)
             overview_matches = match_requests_to_documents(document_requests, overview_docs if overview_docs_ok else [])
-            pending_requests = [r for r, matched_doc in overview_matches if request_needs_upload(r, matched_docs)]
+            pending_requests = [r for r, matched_doc in overview_matches if request_needs_upload(r, matched_doc)]
             if not pending_requests:
                 st.success("No pending document requests.")
             else:
@@ -254,13 +254,13 @@ if st.session_state.logged_in_role == "Patient":
         elif not document_requests:
             st.info("No document requests from staff right now.")
         else:
-            request_docs_ok, request_docs = get_patient_documents(st.session_state.patient_id)
+            request_docs_ok, requested_docs = get_patient_documents(st.session_state.patient_id)
             request_matches = match_requests_to_documents(document_requests, requested_docs if requested_docs_ok else [])
             st.dataframe(format_rows([
                 {
                     "Document Needed": r["type_name"],
                     "Reason": r.get("request_reason") or "-",
-                    "Status": submission_label["requested_at"],
+                    "Status": submission_label(r, matched_doc),
                     "Requested At": r["requested_at"],
                     "Submitted At": matched_doc["uploaded_at"] if matched_doc else "-",
                 }
@@ -460,9 +460,9 @@ elif st.session_state.logged_in_role == "Staff":
                 reviewer = row.get("reviewed_by_name")
                 if reviewer and row.get("reviewed_by_staff_number"):
                     reviewer = f"{reviewer} ({row['reviewed_by_staff_number']})"
-                    row["reviewed_by"] = reviewer or "-"
-                    row["rejection_reason"] = row.get("rejection_reason") or "-"
-                    all_docs_rows.append(row)
+                row["reviewed_by"] = reviewer or "-"
+                row["rejection_reason"] = row.get("rejection_reason") or "-"
+                all_docs_rows.append(row)
 
             st.dataframe(format_rows(all_docs_rows), column_order= [
                 "first_name", "last_name", "id_number", "type_name", "original_filename",
@@ -594,7 +594,7 @@ elif st.session_state.logged_in_role == "Staff":
             #what a patient was asked for and if they submitted it
 
             st.divider()
-            st.subheader(f"Requests for {chosen_patient.split(' - '[0])}")
+            st.subheader(f"Requests for {chosen_patient.split(' - ')[0]}")
             chosen_patient_id = patient_options[chosen_patient]
             sent_ok, sent_request = get_document_requests_for_patient(chosen_patient_id)
             sent_docs_ok, sent_docs = get_patient_documents(chosen_patient_id)
