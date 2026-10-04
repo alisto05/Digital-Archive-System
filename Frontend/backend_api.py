@@ -300,6 +300,9 @@ def get_admin_overview():
 def get_all_staff():
     return _request("GET", "/api/admin/staff")
 
+def get_my_staff_details():
+    return _request("GET", "/api/staff/me")
+
 def get_all_patients():
     return _request("GET", "/api/admin/patients")
 

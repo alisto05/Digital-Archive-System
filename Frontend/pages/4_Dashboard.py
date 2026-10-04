@@ -5,9 +5,11 @@ from backend_api import(get_pending_documents_for_staff, get_staff_dashboard_sta
                         get_recent_activity_for_patient, get_admin_overview, get_all_staff, get_all_patients,
                         register_staff, register_admin, get_pending_patients, update_patient_status, download_document, 
                         get_document_types, upload_document, search_patients, request_document, submit_profile_change,
-                        get_profile_changes_for_patient, get_pending_profile_changes, resolve_profile_change)
+                        get_profile_changes_for_patient, get_pending_profile_changes, resolve_profile_change, get_my_staff_details)
+
 from pdf_export import make_pdf, make_patient_confirmation, make_staff_confirmation
 from formatting import fmt_datetime, fmt_date, format_rows
+from datetime import datetime
 
 #the profile details the backendlets a patient change except names& ID 
 PROFILE_FIELD_LABELS = {
@@ -25,6 +27,68 @@ PROFILE_FIELD_LABELS = {
     "membership_number": "Medical Aid Membership Number",
 }
 MEDICAL_AID_FIELDS = ("provider", "membership_number")
+
+#a request counts as submitted when the patient has a document of the same type
+def _to_datetime(value):
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value).strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+def _uploaded_after(doc, req):
+    uploaded = _to_datetime(doc.get("uploaded_at"))
+    asked = _to_datetime(req.get("requested_at"))
+    if uploaded is None or asked is None:
+        return True
+    try:
+        return uploaded >= asked
+    except TypeError:
+        return True
+
+def match_requests_to_documents(document_requests, documents):
+    used = set()
+    result = {}
+    oldest_first = sorted(range(len(document_requests)),
+                          key= lambda i: str(document_requests[i].get("requested_at")))
+    for i in oldest_first:
+        req = document_requests[i]
+        if req.get("status") == "CANCELLED":
+            result[i] = None
+            continue
+        candidates = [
+            d for d in documents
+            if d["document_id"] not in used
+            and d.get("type_name") == req.get("type_name")
+            and _uploaded_after(d, req)
+        ]
+        candidates.sort(key= lambda d: str(d.get("uploaded_at")))
+        not_rejected = [d for d in candidates if d.get("status") != "REJECTED"]
+        chosen = not_rejected[0] if not_rejected else (candidates[-1] if candidates else None)
+        if chosen is not None:
+            used.add(chosen["document_id"])
+        result[i] = chosen
+    return [(req, result[i]) for i, req in enumerate(document_requests)]
+
+def submission_label(req, doc, for_staff = False):
+    if req.get("status") == "CANCELLED":
+        return "Cancelled"
+    if doc is None:
+        return "Submitted" if req.get("status") == "FULLFILLED" else "Not submitted yet"
+    if doc.get("status") == "REJECTED":
+        return "Rejected - waiting for a new upload" if for_staff else "Rejected - please upload again"
+    if doc.get("status") == "APPROVED":
+        return "Submitted - approved"
+    return "Submitted - waiting for staff review"
+
+#A request still needs a patients action if nothing has been uploaded
+def request_need_upload(req, doc):
+    if req.get("status") == "CANCELLED":
+        return False
+    if doc is None:
+        return req.get("status") != "FULLFILLED"
+    return doc.get("status") == "REJECTED"
 
     
 if "selected_role" not in st.session_state:
@@ -82,7 +146,10 @@ if st.session_state.logged_in_role == "Patient":
         if not requests_ok:
             st.error(document_requests.get("error", "Could not load document requests."))
         else:
-            pending_requests = [r for r in document_requests if r["status"] == "PENDING"]
+        #counts requests the patient has not submitted or were rejected
+            overview_docs_ok, overview_docs = get_patient_documents(st.session_state.patient_id)
+            overview_matches = match_requests_to_documents(document_requests, overview_docs if overview_docs_ok else [])
+            pending_requests = [r for r, matched_doc in overview_matches if request_needs_upload(r, matched_docs)]
             if not pending_requests:
                 st.success("No pending document requests.")
             else:
@@ -187,14 +254,17 @@ if st.session_state.logged_in_role == "Patient":
         elif not document_requests:
             st.info("No document requests from staff right now.")
         else:
+            request_docs_ok, request_docs = get_patient_documents(st.session_state.patient_id)
+            request_matches = match_requests_to_documents(document_requests, requested_docs if requested_docs_ok else [])
             st.dataframe(format_rows([
                 {
                     "Document Needed": r["type_name"],
                     "Reason": r.get("request_reason") or "-",
-                    "Status": r["status"],
+                    "Status": submission_label["requested_at"],
                     "Requested At": r["requested_at"],
+                    "Submitted At": matched_doc["uploaded_at"] if matched_doc else "-",
                 }
-                for r in document_requests
+                for r, matched_doc in request_matches 
             ]))
 
         st.divider()
@@ -283,6 +353,21 @@ elif st.session_state.logged_in_role == "Staff":
             with col2:
                 st.metric("Patient registrations waiting", stats["pending_patient_registrations"])
                 st.caption("Review them in the 'Manage Patient Documents' and 'Patient Registrations' tabs.")
+
+        #Making staff download their own PDF job confirmation
+        st.divider()
+        st.subheader("My staff confirmation")
+        my_details_ok, my_details = get_my_staff_details()
+        if not my_details_ok:
+            st.error(my_details.get("error", "Could not load your staff details."))
+        else:
+            st.download_button(
+                "Download my Staff confirmation (PDF)",
+                data= make_staff_confirmation(my_details),
+                file_name= f"SyncPoint_staff_confirmation_{my_details.get('staff_number')}.pdf",
+                mime= "application/pdf", key= "my_staff_confirmation_pdf",
+                help= "The PDF can be printed. Editing and copying are switched off."
+            )
                 
     with tab2:
         st.subheader("Patient Documents")
@@ -359,6 +444,53 @@ elif st.session_state.logged_in_role == "Staff":
                                     st.rerun()
                                 else:
                                     st.error(result.get("error", "Could not reject document."))
+        st.divider()
+        st.subheader("All patient documents")
+        all_docs_term = st.text_input("Search by patient name, ID or document type", key= "staff_all_docs_search")
+        all_docs_ok, all_docs = get_documents_for_staff(all_docs_term)
+
+        if not all_docs_ok:
+            st.error(all_docs.get("error", "Could not load the documents."))
+        elif not all_docs:
+            st.info("No documents found.")
+        else:
+            all_docs_rows = []
+            for doc in all_docs:
+                row = dict(doc)
+                reviewer = row.get("reviewed_by_name")
+                if reviewer and row.get("reviewed_by_staff_number"):
+                    reviewer = f"{reviewer} ({row['reviewed_by_staff_number']})"
+                    row["reviewed_by"] = reviewer or "-"
+                    row["rejection_reason"] = row.get("rejection_reason") or "-"
+                    all_docs_rows.append(row)
+
+            st.dataframe(format_rows(all_docs_rows), column_order= [
+                "first_name", "last_name", "id_number", "type_name", "original_filename",
+                "status", "uploaded_at", "reviewed_by", "reviewed_at", "rejection_reason"
+            ])
+
+            #Opening a docu, pick it, then fetch it from the backend
+
+            open_labels = {
+                f"{d['first_name']} {d['last_name']} - {d['type_name']} - {d['original_filename']} (#{d['document_id']})": d
+                for d in all_docs
+            }
+            chosen_open_label = st.selectbox("Open a document", list(open_labels.keys()), key= "staff_open_choice")
+            chosen_open_doc = open_labels[chosen_open_label]
+            open_key = f"staff_view_bytes_{chosen_open_doc['document_id']}"
+            if open_key in st.session_state:
+                st.download_button(
+                    "Download PDF to view it", data= st.session_state[open_key],
+                    file_name= chosen_open_doc["original_filename"], mime= "application/pdf",
+                    key= f"staff_view_dl_{chosen_open_doc['document_id']}"
+                )
+            elif st.button("Open document", key= "staff_open_document"):
+                opened_ok, opened = download_document(chosen_open_doc["document_id"])
+                if opened_ok:
+                    st.session_state[open_key] = opened
+                    st.rerun()
+                else:
+                    st.error(opened.get("error", "Could not open the document"))
 
     with tab3:
         st.subheader("Pending Patient Registrations")
@@ -458,6 +590,50 @@ elif st.session_state.logged_in_role == "Staff":
                         st.rerun()
                     else:
                         st.error(result.get("error", "Could not send the request."))
+
+            #what a patient was asked for and if they submitted it
+
+            st.divider()
+            st.subheader(f"Requests for {chosen_patient.split(' - '[0])}")
+            chosen_patient_id = patient_options[chosen_patient]
+            sent_ok, sent_request = get_document_requests_for_patient(chosen_patient_id)
+            sent_docs_ok, sent_docs = get_patient_documents(chosen_patient_id)
+
+            if not sent_ok:
+                st.error(sent_request.get("error", "Could not load this patient's requests."))
+            elif not sent_request:
+                st.info("No document requests have been sent to this patients yet.")
+            else:
+                sent_matches = match_requests_to_documents(sent_request, sent_docs if sent_docs_ok else [])
+                st.dataframe(format_rows([
+                    {
+                        "Document Needed": r["type_name"],
+                        "Reason": r.get("request_reason") or "-",
+                        "Status": submission_label(r, matched_doc, for_staff= True),
+                        "Requested At": r["requested_at"],
+                        "Submitted At": matched_doc["uploaded_at"] if matched_doc else "-",
+                    }
+                    for r, matched_doc in sent_matches
+                ]))
+
+                for r, matched_doc in sent_matches:
+                    if matched_doc is None:
+                        continue
+                    sent_key = f"req_doc_bytes_{matched_doc['document_id']}"
+                    if sent_key in st.session_state:
+                        st.download_button(
+                                f"Download submitted '{r['type_name']}' ({matched_doc['original_filename']})",
+                                data= st.session_state[sent_key], file_name= matched_doc["original_filename"],
+                                mime= "application/pdf", key= f"req_dl_{matched_doc['document_id']}"
+                            )
+                    elif st.button(f"Open submitted '{r['type_name']}'", key= f"req_open_{matched_doc['document_id']}"):
+                        sent_open_ok, sent_open = download_document(matched_doc["document_id"])
+                        if sent_open_ok:
+                            st.session_state[sent_key] = sent_open
+                            st.rerun()
+                        else:
+                            st.error(sent_open.get("error", "Could not open the document."))
+                        
         elif st.session_state.get("request_patient_results") == [] and patient_term:
             st.caption("No approved patient found. Only approved can be founded.")
 
