@@ -1,4 +1,5 @@
-package com.syncpoint.archive.dao;
+
+   package com.syncpoint.archive.dao;
 
 import com.syncpoint.archive.dto.StaffRegistrationRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Types;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class StaffDao {
@@ -38,14 +41,7 @@ public class StaffDao {
                 );
     }
 
-    /** courtesy_title isn't part of sp_register_staff's signature (it wasn't in
-     * the original procedure), so it's set with a follow-up UPDATE — same
-     * approach staff.py already uses.
-     *
-     * username is passed explicitly (not read from r.username()) because
-     * StaffController generates the real username server-side — whatever the
-     * client sent in the request body is just a placeholder to satisfy
-     * validation and must never be what actually gets stored. */
+   
     @Transactional
     public long registerStaff(StaffRegistrationRequest r, String passwordHash,
                                String staffNumber, String username) {
@@ -70,6 +66,17 @@ public class StaffDao {
         return staffId;
     }
 
+    
+    public Optional<Map<String, Object>> getStaffProfile(long staffId) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT staff_id, first_name, last_name, staff_number, job_title,
+                       courtesy_title, department, email, specialization
+                FROM staff
+                WHERE staff_id = ?
+                """, staffId);
+        return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
+    }
+
     public boolean staffNumberExists(String staffNumber) {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM staff WHERE staff_number = ?", Integer.class, staffNumber);
@@ -88,7 +95,7 @@ public class StaffDao {
         return count != null && count > 0;
     }
 
-    // staff.email is UNIQUE, so an empty string must be stored as NULL
+    
     private static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
