@@ -254,7 +254,7 @@ if st.session_state.logged_in_role == "Patient":
         elif not document_requests:
             st.info("No document requests from staff right now.")
         else:
-            request_docs_ok, requested_docs = get_patient_documents(st.session_state.patient_id)
+            requested_docs_ok, requested_docs = get_patient_documents(st.session_state.patient_id)
             request_matches = match_requests_to_documents(document_requests, requested_docs if requested_docs_ok else [])
             st.dataframe(format_rows([
                 {
