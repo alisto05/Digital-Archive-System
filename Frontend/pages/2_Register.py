@@ -102,6 +102,18 @@ st.write("**Email**")
 email = st.text_input("Enter your email address")
 email_2 = st.text_input("Enter your Secondary email address")
 
+def looks_like_email(value):
+    value = value.strip()
+    if " " in value or value.count("@") !=1:
+        return False
+    name, domain = value.split("@")
+    return bool(name) and "." in domain and not domain.startswith(".") and not domain.endswith(".")
+
+if email and not looks_like_email(email):
+    st.error("Please enter a valid email address, e.g name@something.com")
+if email_2 and not looks_like_email(email_2):
+    st.error("Secondary email is not valid, e.g name@something.com")
+    
 st.write("Medical - Aid")
 medical_aid = st.radio("Do you have a Medical Aid ",
                        options= ["Yes", "No"]
