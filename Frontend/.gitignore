@@ -3,7 +3,7 @@
 !.env.example
 .streamlit/secrets.toml
 
-#Uploaded patients PDFs
+#Uploaded patient PDFs
 storage/
 **/storage/
 
@@ -12,12 +12,3 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-
-
-#Java/ Maven 
-target/
-
-#IDE 
-.idea/
-*.iml
-.vscode/
