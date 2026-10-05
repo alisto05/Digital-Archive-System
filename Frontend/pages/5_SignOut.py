@@ -1,5 +1,8 @@
 import streamlit as st
 from backend_api import logout
+from nav import load_css
+
+load_css()
 
 st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
 
