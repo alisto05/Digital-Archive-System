@@ -1,6 +1,16 @@
 import streamlit as st
+from pathlib import Path
+CSS_FILE = Path(__file__).parent / "assets" / "home.css"
+
+def load_css():
+    try:
+        css = CSS_FILE.read_text(encoding="utf-8")
+    except OSError:
+        return
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html= True)
 
 def nav_bar():
+    load_css()
     st.markdown(
         "<style>[data-testid='stSidebarNav'] {display: none;}</style>",
         unsafe_allow_html=True
