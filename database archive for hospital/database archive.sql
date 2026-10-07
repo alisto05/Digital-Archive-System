@@ -1,9 +1,7 @@
-DROP DATABASE IF EXISTS syncpoint_archive;
-CREATE DATABASE syncpoint_archive;
 USE syncpoint_archive;
 
 -- ------------------------------------------------------------
--- users — login accounts for Patients, Staff, AND Admins
+-- users ÔÇö login accounts for Patients, Staff, AND Admins
 -- ------------------------------------------------------------
 CREATE TABLE users (
     user_id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -15,7 +13,7 @@ CREATE TABLE users (
 );
 
 -- ------------------------------------------------------------
--- patients — status/reviewed_by_staff_id/reviewed_at are required
+-- patients ÔÇö status/reviewed_by_staff_id/reviewed_at are required
 -- by db.get_patient_login_data, db.get_pending_patients,
 -- db.update_patient_status, and pages/8_Approvals.py.
 -- ------------------------------------------------------------
@@ -76,7 +74,7 @@ CREATE TABLE patient_medical_aid (
 );
 
 -- ------------------------------------------------------------
--- staff — email/specialization required by the Admin "Add Staff
+-- staff ÔÇö email/specialization required by the Admin "Add Staff
 -- Member" form.
 -- ------------------------------------------------------------
 CREATE TABLE staff (
@@ -100,7 +98,7 @@ ALTER TABLE patients
     FOREIGN KEY (reviewed_by_staff_id) REFERENCES staff(staff_id);
 
 -- ------------------------------------------------------------
--- admins — a separate identity table, same pattern as `staff`.
+-- admins ÔÇö a separate identity table, same pattern as `staff`.
 -- ------------------------------------------------------------
 CREATE TABLE admins (
     admin_id       BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -113,20 +111,7 @@ CREATE TABLE admins (
 );
 
 -- ------------------------------------------------------------
--- Seed a single bootstrap Admin account so there's a way to log
--- in for the first time. Username: admin  Password: ChangeMe123!
--- >>> CHANGE THIS PASSWORD IMMEDIATELY AFTER FIRST LOGIN. <<<
--- ------------------------------------------------------------
-INSERT INTO users (username, password_hash, role)
-VALUES ('admin',
-        'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4$2639f6cc7ef8fdcf26342445a1abccc8275520b8c3d55646413269954c4c5d56',
-        'ADMIN');
-
-INSERT INTO admins (user_id, first_name, last_name)
-SELECT user_id, 'System', 'Administrator' FROM users WHERE username = 'admin';
-
--- ------------------------------------------------------------
--- document_types — lookup for the upload/search pages
+-- document_types ÔÇö lookup for the upload/search pages
 -- ------------------------------------------------------------
 CREATE TABLE document_types (
     document_type_id   INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -169,7 +154,7 @@ CREATE TABLE documents (
 );
 
 -- ------------------------------------------------------------
--- document_requests — Staff requesting a document from a Patient
+-- document_requests ÔÇö Staff requesting a document from a Patient
 -- ------------------------------------------------------------
 CREATE TABLE document_requests (
     request_id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -186,7 +171,7 @@ CREATE TABLE document_requests (
 );
 
 -- ------------------------------------------------------------
--- profile_change_requests — Patient requesting an info update
+-- profile_change_requests ÔÇö Patient requesting an info update
 -- ------------------------------------------------------------
 CREATE TABLE profile_change_requests (
     change_request_id       BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -236,7 +221,7 @@ CREATE TABLE search_history (
 );
 
 -- ------------------------------------------------------------
--- audit_logs — populated by triggers only, never inserted directly
+-- audit_logs ÔÇö populated by triggers only, never inserted directly
 -- ------------------------------------------------------------
 CREATE TABLE audit_logs (
     log_id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -257,7 +242,7 @@ CREATE TABLE audit_logs (
 
 
 -- ============================================================
--- PART 2 — TRIGGERS AND STORED PROCEDURES
+-- PART 2 ÔÇö TRIGGERS AND STORED PROCEDURES
 -- (runs against the schema just created above)
 -- ============================================================
 
@@ -472,7 +457,7 @@ BEGIN
 END$$
 
 -- Approves or rejects a PENDING patient account. p_reviewed_by_staff_id
--- is a staff.staff_id (not a users.user_id) — trg_patients_after_update
+-- is a staff.staff_id (not a users.user_id) ÔÇö trg_patients_after_update
 -- resolves it to the right user_id for the audit log entry.
 CREATE PROCEDURE sp_review_patient (
     IN p_patient_id BIGINT UNSIGNED, IN p_new_status VARCHAR(20),
