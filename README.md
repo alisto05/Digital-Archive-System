@@ -47,7 +47,7 @@ The project is organised as a full-stack application with:
 
 ```text
                          ┌─────────────────────────┐
-                         │       Web Browser        │
+                         │       Web Browser       │
                          └────────────┬────────────┘
                                       │
                                       ▼
