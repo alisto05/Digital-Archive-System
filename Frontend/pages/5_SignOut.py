@@ -1,6 +1,5 @@
 import streamlit as st
 from backend_api import logout
-from nav import footer
 
 st.logo("assets/logo.png", size="large", icon_image="assets/logo.png")
 
@@ -23,5 +22,3 @@ with col2:
         st.switch_page("pages/4_Dashboard.py")
         
 st.stop()
-
-footer()
