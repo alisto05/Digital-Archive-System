@@ -10,8 +10,8 @@ title = st.title("Welcome to SyncPoint")
 left, middle, right = st.columns([1, 2, 1])
 with middle:
     st.image("assets/logo-removebg.png", use_container_width= True)
-    subheader = st.subheader("Hospital Digital Archive System")
-    st.write("Hospital operations by improving data accessibility, reducing risks of lost or misplaced records, and enabling efficient reporting for hospital administration")
+subheader = st.subheader("Hospital Digital Archive System")
+st.write("Hospital operations by improving data accessibility, reducing risks of lost or misplaced records, and enabling efficient reporting for hospital administration")
 
 st.divider()
 

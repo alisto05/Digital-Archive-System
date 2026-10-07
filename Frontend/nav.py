@@ -1,10 +1,13 @@
 import streamlit as st
+from pathlib import Path
 
 def nav_bar():
     st.markdown(
         "<style>[data-testid='stSidebarNav'] {display: none;}</style>",
         unsafe_allow_html=True
     )
+
+    st.markdown(f"<style>{(Path(__file__).parent / 'style.css').read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
 
     with st.sidebar:
         st.page_link("home.py", label="Home")

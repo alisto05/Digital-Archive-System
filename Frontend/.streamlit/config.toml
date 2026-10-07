@@ -1,0 +1,5 @@
+[theme]
+base = "dark"
+primaryColor = "#0265FE"
+dataframeHeaderBackgroundColor = "#3D8BFF"
+dataframeBorderColor = "rgba(61, 139, 255, 0.35)"
